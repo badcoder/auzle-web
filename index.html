@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auzle · Aurdle - Daily Audio Puzzle</title>
+<link rel="stylesheet" href="auzle-game.css">
+<style>
+body{background:#f8f9fa;display:flex;justify-content:center;min-height:100vh}
+.mode-picker{text-align:center;margin:20px 0}
+.mode-picker button{margin:0 6px;padding:8px 18px;border-radius:20px;border:2px solid #ddd;background:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.mode-picker button.active{border-color:#4361ee;background:#4361ee;color:#fff}
+</style>
+</head>
+<body>
+<div style="max-width:480px;width:100%;padding:16px">
+<div class="mode-picker">
+  <button onclick="load('EASY',3,3,'Easy','#2ecc71')" id="btn-easy">Easy</button>
+  <button onclick="load('MEDIUM',4,4,'Medium','#f39c12')" id="btn-med">Medium</button>
+  <button onclick="load('HARD',5,4,'Hard','#e74c3c')" id="btn-hard">Hard</button>
+</div>
+<div id="auzle-game"></div>
+</div>
+<script>
+function load(diff,wl,oc,label,color){
+  window.AUZLE_CONFIG={difficulty:diff,wordLen:wl,optCount:oc,label:label,color:color};
+  document.querySelectorAll('.mode-picker button').forEach(function(b){b.classList.remove('active')});
+  document.getElementById('btn-'+diff.toLowerCase().substr(0,4)).classList.add('active');
+  var s=document.getElementById('game-script');
+  if(s)s.remove();
+  s=document.createElement('script');s.id='game-script';s.src='auzle-game.js?t='+Date.now();
+  document.body.appendChild(s);
+}
+load('EASY',3,3,'Easy','#2ecc71');
+</script>
+</body>
+</html>
