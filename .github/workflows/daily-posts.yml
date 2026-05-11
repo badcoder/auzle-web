@@ -2,7 +2,7 @@ name: Daily Blogspot Posts
 
 on:
   schedule:
-    - cron: '16 11 * * *'  # Temporary: test run at 11:16 UTC (16:46 IST)
+    - cron: '30 11 * * *'  # Runs daily at 5:00 PM IST (11:30 UTC)
   workflow_dispatch: # Manual trigger
 
 jobs:
