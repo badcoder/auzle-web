@@ -1,0 +1,73 @@
+name: Daily Blogspot Posts
+
+on:
+  schedule:
+    - cron: '30 18 * * *'  # Runs daily at midnight IST (18:30 UTC previous day)
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish daily posts to Blogger
+        env:
+          BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
+          BLOGGER_REFRESH_TOKEN: ${{ secrets.BLOGGER_REFRESH_TOKEN }}
+          BLOGGER_CLIENT_ID: ${{ secrets.BLOGGER_CLIENT_ID }}
+          BLOGGER_CLIENT_SECRET: ${{ secrets.BLOGGER_CLIENT_SECRET }}
+        run: |
+          # Refresh the access token
+          RESPONSE=$(curl -s -X POST "https://oauth2.googleapis.com/token" \
+            -d "client_id=${BLOGGER_CLIENT_ID}" \
+            -d "client_secret=${BLOGGER_CLIENT_SECRET}" \
+            -d "refresh_token=${BLOGGER_REFRESH_TOKEN}" \
+            -d "grant_type=refresh_token")
+
+          ACCESS_TOKEN=$(echo "$RESPONSE" | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+
+          if [ -z "$ACCESS_TOKEN" ] || [ "$ACCESS_TOKEN" = "None" ]; then
+            echo "ERROR: Failed to get access token"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          TODAY=$(date +%Y-%m-%d)
+          EPOCH="2026-05-08"
+          PUZZLE_NUM=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$EPOCH" +%s) ) / 86400 + 1 ))
+
+          BASE_URL="https://badcoder.github.io/auzle-web"
+
+          publish_post() {
+            local DIFF="$1" WLEN="$2" OCOUNT="$3" LABEL="$4" COLOR="$5"
+
+            local TITLE="🎧 Auzle #${PUZZLE_NUM} · ${LABEL} · ${TODAY}"
+
+            local BODY="<p>Daily audio puzzle #${PUZZLE_NUM}. Listen to patterns, match the sound, guess the word!</p><link rel=\"stylesheet\" href=\"${BASE_URL}/auzle-game.css\"><div id=\"auzle-game\"></div><script>window.AUZLE_CONFIG={difficulty:'${DIFF}',wordLen:${WLEN},optCount:${OCOUNT},label:'${LABEL}',color:'${COLOR}'};</script><script src=\"${BASE_URL}/auzle-game.js\"></script>"
+
+            local POST_JSON
+            POST_JSON=$(python3 -c "
+          import json, sys
+          print(json.dumps({
+              'kind': 'blogger#post',
+              'title': sys.argv[1],
+              'content': sys.argv[2],
+              'labels': ['auzle', sys.argv[3].lower(), 'puzzle-' + sys.argv[4]]
+          }))" "$TITLE" "$BODY" "$LABEL" "$PUZZLE_NUM")
+
+            local RESULT
+            RESULT=$(curl -s -X POST \
+              "https://www.googleapis.com/blogger/v3/blogs/${BLOGGER_BLOG_ID}/posts/" \
+              -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "$POST_JSON")
+
+            echo "Published ${LABEL}: $(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('url','ERROR'))" 2>/dev/null || echo 'Failed')"
+          }
+
+          publish_post "EASY" 3 3 "Easy" "#2ecc71"
+          sleep 2
+          publish_post "MEDIUM" 4 4 "Medium" "#f39c12"
+          sleep 2
+          publish_post "HARD" 5 4 "Hard" "#e74c3c"
