@@ -106,6 +106,16 @@ var MELODIES = {
 
 var PIECE_COUNTS = [6, 9, 12, 16, 24, 32];
 
+// Explicit grid layouts: cols × rows = exact piece count (no leftover slots)
+var GRID_LAYOUTS = {
+  6:  [3, 2],
+  9:  [3, 3],
+  12: [4, 3],
+  16: [4, 4],
+  24: [6, 4],
+  32: [8, 4]
+};
+
 // === JIGSAW SHAPE GENERATOR ===
 // Each piece edge: 0=flat, 1=tab(out), -1=blank(in)
 // Adjacent pieces have complementary edges (tab meets blank)
@@ -642,8 +652,9 @@ function startGame(melodyName, pieceCount){
   if(!melody) melodyName = Object.keys(MELODIES)[0];
   melody = MELODIES[melodyName];
 
-  var cols = Math.ceil(Math.sqrt(pieceCount));
-  var rows = Math.ceil(pieceCount / cols);
+  var layout = GRID_LAYOUTS[pieceCount] || [Math.ceil(Math.sqrt(pieceCount)), Math.ceil(pieceCount / Math.ceil(Math.sqrt(pieceCount)))];
+  var cols = layout[0];
+  var rows = layout[1];
 
   state.melodyName = melodyName;
   state.pieceCount = pieceCount;
