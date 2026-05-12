@@ -278,7 +278,8 @@ var state = {
   isPlaying: false,
   edgeMap: [],
   cols: 3,
-  rows: 2
+  rows: 2,
+  showShapes: false
 };
 
 // === SPLIT MELODY INTO PIECES ===
@@ -366,6 +367,15 @@ function render(){
   ctrl.appendChild(melSel); ctrl.appendChild(pcSel); ctrl.appendChild(newBtn); ctrl.appendChild(playMelBtn);
   app.appendChild(ctrl);
 
+  // Shape hints toggle
+  var toggleRow = ce('div','controls');
+  var shapeBtn = ce('button');
+  shapeBtn.textContent = state.showShapes ? '\uD83E\uDDE9 Shapes: ON' : '\u25A2 Shapes: OFF';
+  shapeBtn.style.background = state.showShapes ? '#2ecc71' : '#555';
+  shapeBtn.onclick = function(){ state.showShapes = !state.showShapes; render(); };
+  toggleRow.appendChild(shapeBtn);
+  app.appendChild(toggleRow);
+
   var cols = state.cols, rows = state.rows;
   // Calculate piece display size based on available width
   var maxFrameW = Math.min(480, window.innerWidth - 60);
@@ -377,38 +387,63 @@ function render(){
   app.appendChild(fl);
 
   var frame = ce('div','jigsaw-frame');
-  frame.style.gridTemplateColumns = 'repeat('+cols+', '+(pieceSize + pieceSize*0.4)+'px)';
-  frame.style.gridTemplateRows = 'repeat('+rows+', '+(pieceSize + pieceSize*0.4)+'px)';
+  var cellSize = state.showShapes ? (pieceSize + pieceSize*0.4) : (pieceSize + 4);
+  frame.style.gridTemplateColumns = 'repeat('+cols+', '+cellSize+'px)';
+  frame.style.gridTemplateRows = 'repeat('+rows+', '+cellSize+'px)';
   frame.style.width = 'fit-content';
+  if(!state.showShapes) frame.style.gap = '0px';
 
   for(var i=0; i<state.pieceCount; i++){
     (function(slotIdx){
       var slot = ce('div','frame-slot');
-      slot.style.width = (pieceSize + pieceSize*0.4) + 'px';
-      slot.style.height = (pieceSize + pieceSize*0.4) + 'px';
-
       var edges = state.edgeMap[slotIdx] || {top:0,right:0,bottom:0,left:0};
+      var useShapes = state.showShapes;
+
+      if(useShapes){
+        slot.style.width = (pieceSize + pieceSize*0.4) + 'px';
+        slot.style.height = (pieceSize + pieceSize*0.4) + 'px';
+      } else {
+        slot.style.width = pieceSize + 'px';
+        slot.style.height = pieceSize + 'px';
+        slot.style.borderRadius = '4px';
+        slot.style.border = '2px dashed #333';
+        slot.style.margin = '2px';
+      }
 
       if(state.frame[slotIdx] !== null){
         slot.classList.add('filled');
-        var svg = createPieceSVG(pieceSize, edges, '#4361ee', '#5a7afe');
-        svg.classList.add('slot-bg');
-        svg.style.position = 'absolute';
-        svg.style.inset = '0';
-        slot.appendChild(svg);
+        if(useShapes){
+          var svg = createPieceSVG(pieceSize, edges, '#4361ee', '#5a7afe');
+          svg.classList.add('slot-bg');
+          svg.style.position = 'absolute';
+          svg.style.inset = '0';
+          slot.appendChild(svg);
+        } else {
+          slot.style.background = '#4361ee';
+          slot.style.border = '2px solid #5a7afe';
+        }
         var lbl = ce('span','slot-label'); lbl.textContent = '\uD83C\uDFB5';
         slot.appendChild(lbl);
         slot.onclick = function(){
           if(state.solved || state.isPlaying) return;
-          playPieceAudio(state.frame[slotIdx]);
+          // Undo: return piece to pool
+          var pieceId = state.frame[slotIdx];
+          state.frame[slotIdx] = null;
+          state.pool.push(pieceId);
+          state.moves++;
+          toast('\u21A9 Piece returned to pool');
+          render();
         };
       } else {
-        // Empty slot - show outline shape
-        var svg = createPieceSVG(pieceSize, edges, 'rgba(15,52,96,0.6)', '#333');
-        svg.classList.add('slot-bg');
-        svg.style.position = 'absolute';
-        svg.style.inset = '0';
-        slot.appendChild(svg);
+        if(useShapes){
+          var svg = createPieceSVG(pieceSize, edges, 'rgba(15,52,96,0.6)', '#333');
+          svg.classList.add('slot-bg');
+          svg.style.position = 'absolute';
+          svg.style.inset = '0';
+          slot.appendChild(svg);
+        } else {
+          slot.style.background = 'rgba(15,52,96,0.6)';
+        }
         var lbl = ce('span','slot-label'); lbl.textContent = (slotIdx + 1);
         slot.appendChild(lbl);
 
@@ -462,9 +497,17 @@ function render(){
 
       if(state.selectedPiece === pieceId) piece.classList.add('selected');
 
-      // Render jigsaw shape
-      var svg = createPieceSVG(40, edges, state.selectedPiece===pieceId ? '#ffd700' : '#4361ee', state.selectedPiece===pieceId ? '#ffed4a' : '#5a7afe');
-      piece.appendChild(svg);
+      // Render piece shape
+      if(state.showShapes){
+        var svg = createPieceSVG(40, edges, state.selectedPiece===pieceId ? '#ffd700' : '#4361ee', state.selectedPiece===pieceId ? '#ffed4a' : '#5a7afe');
+        piece.appendChild(svg);
+      } else {
+        piece.style.width = '48px';
+        piece.style.height = '48px';
+        piece.style.borderRadius = '8px';
+        piece.style.background = state.selectedPiece===pieceId ? '#ffd700' : '#4361ee';
+        piece.style.border = '2px solid ' + (state.selectedPiece===pieceId ? '#ffed4a' : '#5a7afe');
+      }
       var lbl = ce('div','piece-label'); lbl.textContent = '\uD83C\uDFB5';
       piece.appendChild(lbl);
 
