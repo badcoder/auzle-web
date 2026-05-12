@@ -99,7 +99,8 @@ var EPOCH = new Date('2026-05-12');
 // === DAILY PUZZLE ===
 function getDayNum(){
   var today = new Date(); today.setHours(0,0,0,0);
-  return Math.floor((today - EPOCH) / 86400000) + 1;
+  var ep = new Date(EPOCH); ep.setHours(0,0,0,0);
+  return Math.floor((today - ep) / 86400000) + 1;
 }
 function getDailyMelody(){
   var dayNum = getDayNum();
@@ -250,7 +251,7 @@ function render(){
 
   // Top bar
   var tb=ce('div','top-bar');
-  tb.innerHTML='<h1>\uD83E\uDDE9 Ausaw</h1><div class="subtitle">Audio Jigsaw by Auzle</div><div class="day-info">Day #'+dayNum+' \u00B7 '+melody.lang+'</div>';
+  tb.innerHTML='<h1>\uD83E\uDDE9 Ausaw</h1><div class="subtitle">Audio Jigsaw by Auzle</div><div class="day-info">Day #'+dayNum+' \u00B7 '+melody.name+'</div>';
   app.appendChild(tb);
 
   // Difficulty tabs
@@ -315,13 +316,13 @@ function render(){
           toast('\u21A9 Piece returned'); render();
         };
       } else {
+        slot.style.position='relative';
         if(state.showBoardHints && state.edgeMap[si]){
-          // Show jigsaw outline as hint
-          var svg=createPieceSVG(pieceSize*0.7,state.edgeMap[si],'rgba(67,97,238,0.08)','#ccc');
-          svg.style.position='absolute';svg.style.top='2px';svg.style.left='2px';
+          var svg=createPieceSVG(pieceSize*0.7,state.edgeMap[si],'rgba(67,97,238,0.1)','#bbb');
+          svg.style.position='absolute';svg.style.top='50%';svg.style.left='50%';
+          svg.style.transform='translate(-50%,-50%)';
           slot.appendChild(svg);
         }
-        slot.textContent=state.showBoardHints?'':'';
         if(state.selectedPiece!==null) slot.classList.add('awaiting');
         slot.onclick=function(){
           if(state.solved||state.isPlaying) return;
