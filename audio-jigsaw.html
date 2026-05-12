@@ -18,28 +18,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 /* Jigsaw Frame */
 .frame-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#888;margin:12px 0 8px;font-weight:600;text-align:center}
-.jigsaw-frame{display:grid;gap:3px;margin:0 auto 20px;padding:8px;background:#16213e;border-radius:12px;border:2px solid #4361ee}
-.frame-slot{aspect-ratio:1;border-radius:6px;background:#0f3460;border:2px dashed #333;display:flex;align-items:center;justify-content:center;font-size:11px;color:#555;transition:all .2s;cursor:pointer;position:relative;overflow:hidden}
-.frame-slot.filled{border:2px solid #4361ee;background:#1a1a4e}
-.frame-slot.filled .piece-inner{opacity:1}
-.frame-slot.highlight{animation:glow 0.5s ease;border-color:#ffd700;box-shadow:0 0 12px rgba(255,215,0,0.5)}
-.frame-slot.drop-target{border-color:#2ecc71;background:#0f3460;box-shadow:0 0 8px rgba(46,204,113,0.3)}
-@keyframes glow{0%,100%{box-shadow:0 0 4px rgba(255,215,0,0.3)}50%{box-shadow:0 0 16px rgba(255,215,0,0.7)}}
+.jigsaw-frame{display:grid;gap:0;margin:0 auto 20px;padding:12px;background:#16213e;border-radius:12px;border:2px solid #4361ee}
+.frame-slot{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.frame-slot .slot-bg{position:absolute;inset:0;opacity:0.4}
+.frame-slot .slot-label{position:relative;z-index:1;font-size:11px;color:#555;font-weight:700}
+.frame-slot.filled .slot-bg{opacity:1}
+.frame-slot.filled .slot-label{color:rgba(255,255,255,0.9)}
+.frame-slot.highlight .slot-bg{filter:brightness(1.5)}
+.frame-slot.highlight{animation:glow 0.5s ease}
+.frame-slot.drop-target .slot-bg{filter:brightness(1.3)}
+.frame-slot.awaiting{animation:pulse-slot 1s infinite}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 4px rgba(255,215,0,0.3))}50%{filter:drop-shadow(0 0 12px rgba(255,215,0,0.7))}}
+@keyframes pulse-slot{0%,100%{filter:drop-shadow(0 0 2px rgba(46,204,113,0.3))}50%{filter:drop-shadow(0 0 8px rgba(46,204,113,0.6))}}
 
 /* Piece Pool */
 .pool-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#888;margin:12px 0 8px;font-weight:600;text-align:center}
-.piece-pool{display:grid;gap:4px;margin:0 auto;padding:8px;background:#16213e;border-radius:12px;min-height:60px}
-.piece{aspect-ratio:1;border-radius:8px;background:linear-gradient(135deg,#4361ee,#3a56d4);border:2px solid #5a7afe;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;position:relative;user-select:none}
-.piece:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(67,97,238,0.4)}
-.piece.selected{border-color:#ffd700;box-shadow:0 0 12px rgba(255,215,0,0.5);transform:scale(1.08)}
+.piece-pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 auto;padding:12px;background:#16213e;border-radius:12px;min-height:60px}
+.piece{width:56px;height:56px;position:relative;cursor:pointer;transition:all .15s;user-select:none;-webkit-tap-highlight-color:transparent}
+.piece:hover{transform:scale(1.1);filter:drop-shadow(0 4px 8px rgba(67,97,238,0.5))}
+.piece.selected{transform:scale(1.15);filter:drop-shadow(0 0 12px rgba(255,215,0,0.7))}
 .piece.playing{animation:pulse-piece 0.6s infinite}
-.piece .piece-num{font-size:10px;font-weight:700;color:rgba(255,255,255,0.9)}
-.piece .note-icon{font-size:16px}
-@keyframes pulse-piece{0%,100%{box-shadow:0 0 4px rgba(67,97,238,0.4)}50%{box-shadow:0 0 16px rgba(67,97,238,0.8)}}
+.piece .piece-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;pointer-events:none}
+@keyframes pulse-piece{0%,100%{filter:drop-shadow(0 0 4px rgba(67,97,238,0.4))}50%{filter:drop-shadow(0 0 12px rgba(67,97,238,0.8))}}
 
-/* Placed piece in frame */
-.piece-inner{width:100%;height:100%;border-radius:4px;background:linear-gradient(135deg,#4361ee,#3a56d4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
-.piece-inner .note-icon{font-size:14px}
+/* Dragging */
+.piece.dragging{opacity:0.5;transform:scale(0.9)}
+.drag-ghost{position:fixed;pointer-events:none;z-index:1000;opacity:0.85;transform:translate(-50%,-50%)}
 
 /* Result */
 .result{text-align:center;padding:16px 0;font-size:18px;font-weight:600}
@@ -58,7 +62,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 (function(){
 'use strict';
 
-// === MELODIES (note arrays: [frequency, duration in beats]) ===
+// === MELODIES ===
 var MELODIES = {
   'Twinkle Twinkle': {
     bpm: 120,
@@ -102,6 +106,116 @@ var MELODIES = {
 
 var PIECE_COUNTS = [6, 9, 12, 16, 24, 32];
 
+// === JIGSAW SHAPE GENERATOR ===
+// Each piece edge: 0=flat, 1=tab(out), -1=blank(in)
+// Adjacent pieces have complementary edges (tab meets blank)
+function generateEdgeMap(cols, rows, count){
+  // For each internal edge, assign direction (1 or -1)
+  // edgeMap[pieceIdx] = {top, right, bottom, left}
+  var edges = [];
+  for(var r=0; r<rows; r++){
+    for(var c=0; c<cols; c++){
+      var idx = r * cols + c;
+      if(idx >= count) break;
+      var top = 0, right = 0, bottom = 0, left = 0;
+      // Top edge: flat if first row, else opposite of piece above's bottom
+      if(r === 0) top = 0;
+      else top = -(edges[(r-1)*cols + c].bottom);
+      // Left edge: flat if first col, else opposite of piece to left's right
+      if(c === 0) left = 0;
+      else left = -(edges[r*cols + c - 1].right);
+      // Right edge: flat if last col, else random
+      if(c === cols-1) right = 0;
+      else right = Math.random() > 0.5 ? 1 : -1;
+      // Bottom edge: flat if last row or beyond count, else random
+      if(r === rows-1 || (r+1)*cols + c >= count) bottom = 0;
+      else bottom = Math.random() > 0.5 ? 1 : -1;
+      edges.push({top:top, right:right, bottom:bottom, left:left});
+    }
+  }
+  return edges;
+}
+
+// Generate SVG path for a jigsaw piece
+// size = base size of piece square, tab protrudes ~20% beyond
+function jigsawPath(size, edges, forClip){
+  var s = size;
+  var tab = s * 0.2; // tab protrusion size
+  var neck = s * 0.1; // neck width
+  var w = s * 0.3; // tab width at base
+
+  // We draw path starting from top-left, going clockwise
+  // Coordinate system: (0,0) is top-left of piece bounding box
+  // The actual piece square occupies (tab, tab) to (tab+s, tab+s) to leave room for tabs
+  var ox = tab, oy = tab; // offset
+  var d = '';
+
+  // Top edge (left to right)
+  d += 'M '+ox+' '+oy+' ';
+  if(edges.top === 0){
+    d += 'L '+(ox+s)+' '+oy+' ';
+  } else {
+    var dir = edges.top; // 1=tab out (up), -1=blank in (down)
+    d += 'L '+(ox+s*0.35)+' '+oy+' ';
+    d += 'C '+(ox+s*0.35)+' '+(oy - dir*tab*0.1)+' '+(ox+s*0.4)+' '+(oy - dir*tab*0.8)+' '+(ox+s*0.5)+' '+(oy - dir*tab)+' ';
+    d += 'C '+(ox+s*0.6)+' '+(oy - dir*tab*0.8)+' '+(ox+s*0.65)+' '+(oy - dir*tab*0.1)+' '+(ox+s*0.65)+' '+oy+' ';
+    d += 'L '+(ox+s)+' '+oy+' ';
+  }
+
+  // Right edge (top to bottom)
+  if(edges.right === 0){
+    d += 'L '+(ox+s)+' '+(oy+s)+' ';
+  } else {
+    var dir = edges.right; // 1=tab out (right), -1=blank in (left)
+    d += 'L '+(ox+s)+' '+(oy+s*0.35)+' ';
+    d += 'C '+(ox+s + dir*tab*0.1)+' '+(oy+s*0.35)+' '+(ox+s + dir*tab*0.8)+' '+(oy+s*0.4)+' '+(ox+s + dir*tab)+' '+(oy+s*0.5)+' ';
+    d += 'C '+(ox+s + dir*tab*0.8)+' '+(oy+s*0.6)+' '+(ox+s + dir*tab*0.1)+' '+(oy+s*0.65)+' '+(ox+s)+' '+(oy+s*0.65)+' ';
+    d += 'L '+(ox+s)+' '+(oy+s)+' ';
+  }
+
+  // Bottom edge (right to left)
+  if(edges.bottom === 0){
+    d += 'L '+ox+' '+(oy+s)+' ';
+  } else {
+    var dir = edges.bottom; // 1=tab out (down), -1=blank in (up)
+    d += 'L '+(ox+s*0.65)+' '+(oy+s)+' ';
+    d += 'C '+(ox+s*0.65)+' '+(oy+s + dir*tab*0.1)+' '+(ox+s*0.6)+' '+(oy+s + dir*tab*0.8)+' '+(ox+s*0.5)+' '+(oy+s + dir*tab)+' ';
+    d += 'C '+(ox+s*0.4)+' '+(oy+s + dir*tab*0.8)+' '+(ox+s*0.35)+' '+(oy+s + dir*tab*0.1)+' '+(ox+s*0.35)+' '+(oy+s)+' ';
+    d += 'L '+ox+' '+(oy+s)+' ';
+  }
+
+  // Left edge (bottom to top)
+  if(edges.left === 0){
+    d += 'L '+ox+' '+oy+' ';
+  } else {
+    var dir = edges.left; // 1=tab out (left), -1=blank in (right)
+    d += 'L '+ox+' '+(oy+s*0.65)+' ';
+    d += 'C '+(ox - dir*tab*0.1)+' '+(oy+s*0.65)+' '+(ox - dir*tab*0.8)+' '+(oy+s*0.6)+' '+(ox - dir*tab)+' '+(oy+s*0.5)+' ';
+    d += 'C '+(ox - dir*tab*0.8)+' '+(oy+s*0.4)+' '+(ox - dir*tab*0.1)+' '+(oy+s*0.35)+' '+ox+' '+(oy+s*0.35)+' ';
+    d += 'L '+ox+' '+oy+' ';
+  }
+
+  d += 'Z';
+  return d;
+}
+
+// Create an SVG element for a jigsaw piece
+function createPieceSVG(size, edges, fillColor, strokeColor){
+  var totalSize = size + size * 0.4; // room for tabs
+  var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width', totalSize);
+  svg.setAttribute('height', totalSize);
+  svg.setAttribute('viewBox', '0 0 '+totalSize+' '+totalSize);
+  svg.style.display = 'block';
+  var path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d', jigsawPath(size, edges));
+  path.setAttribute('fill', fillColor);
+  path.setAttribute('stroke', strokeColor);
+  path.setAttribute('stroke-width', '1.5');
+  svg.appendChild(path);
+  return svg;
+}
+
 // === AUDIO ENGINE ===
 var actx = null;
 function ensureAudio(){
@@ -122,14 +236,12 @@ function playNotes(notes, bpm, onNote, onDone){
     osc.frequency.value = freq;
     osc.connect(gain);
     gain.connect(actx.destination);
-    // Piano-like envelope
     gain.gain.setValueAtTime(0, t);
     gain.gain.linearRampToValueAtTime(0.3, t + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.01, t + dur * 0.95);
     gain.gain.linearRampToValueAtTime(0, t + dur);
     osc.start(t);
     osc.stop(t + dur);
-    // Schedule highlight callback
     if(onNote){
       (function(idx, time){
         setTimeout(function(){ onNote(idx); }, (time - actx.currentTime) * 1000);
@@ -143,18 +255,20 @@ function playNotes(notes, bpm, onNote, onDone){
 
 // === GAME STATE ===
 var state = {
-  melody: null,
   melodyName: '',
-  pieceCount: 12,
-  pieces: [],       // array of {id, notes, correctIndex}
-  frame: [],        // array of pieceId or null (length = pieceCount)
-  pool: [],         // array of piece ids still in pool
+  pieceCount: 6,
+  pieces: [],
+  frame: [],
+  pool: [],
   selectedPiece: null,
   solved: false,
   moves: 0,
   startTime: 0,
   timerStarted: false,
-  isPlaying: false
+  isPlaying: false,
+  edgeMap: [],
+  cols: 3,
+  rows: 2
 };
 
 // === SPLIT MELODY INTO PIECES ===
@@ -174,18 +288,15 @@ function splitMelody(notes, count){
       currentPiece = [];
       pieceIdx++;
       if(pieceIdx >= count - 1 && i < notes.length - 1){
-        // Last piece gets remaining notes
         pieces.push({id: pieceIdx, notes: notes.slice(i+1), correctIndex: pieceIdx});
         break;
       }
     }
   }
-  // Ensure we have exactly count pieces
   while(pieces.length < count) pieces.push({id: pieces.length, notes: [[262, 0.5]], correctIndex: pieces.length});
   return pieces.slice(0, count);
 }
 
-// === SHUFFLE ===
 function shuffle(arr){
   arr = arr.slice();
   for(var i=arr.length-1; i>0; i--){
@@ -231,36 +342,73 @@ function render(){
   ctrl.appendChild(melSel); ctrl.appendChild(pcSel); ctrl.appendChild(newBtn);
   app.appendChild(ctrl);
 
-  // Compute grid columns
-  var cols = Math.ceil(Math.sqrt(state.pieceCount));
-  var rows = Math.ceil(state.pieceCount / cols);
+  var cols = state.cols, rows = state.rows;
+  // Calculate piece display size based on available width
+  var maxFrameW = Math.min(480, window.innerWidth - 60);
+  var pieceSize = Math.floor((maxFrameW - 24) / cols) - 2;
+  pieceSize = Math.max(36, Math.min(pieceSize, 64));
 
   // Jigsaw Frame
   var fl = ce('div','frame-label'); fl.textContent = 'Jigsaw Frame \u2014 ' + state.melodyName;
   app.appendChild(fl);
 
   var frame = ce('div','jigsaw-frame');
-  frame.style.gridTemplateColumns = 'repeat('+cols+', 1fr)';
-  frame.style.maxWidth = Math.min(cols * 52, 480) + 'px';
+  frame.style.gridTemplateColumns = 'repeat('+cols+', '+(pieceSize + pieceSize*0.4)+'px)';
+  frame.style.gridTemplateRows = 'repeat('+rows+', '+(pieceSize + pieceSize*0.4)+'px)';
+  frame.style.width = 'fit-content';
 
   for(var i=0; i<state.pieceCount; i++){
     (function(slotIdx){
       var slot = ce('div','frame-slot');
+      slot.style.width = (pieceSize + pieceSize*0.4) + 'px';
+      slot.style.height = (pieceSize + pieceSize*0.4) + 'px';
+
+      var edges = state.edgeMap[slotIdx] || {top:0,right:0,bottom:0,left:0};
+
       if(state.frame[slotIdx] !== null){
         slot.classList.add('filled');
-        var inner = ce('div','piece-inner');
-        inner.innerHTML = '<span class="note-icon">\uD83C\uDFB5</span>';
-        slot.appendChild(inner);
+        var svg = createPieceSVG(pieceSize, edges, '#4361ee', '#5a7afe');
+        svg.classList.add('slot-bg');
+        svg.style.position = 'absolute';
+        svg.style.inset = '0';
+        slot.appendChild(svg);
+        var lbl = ce('span','slot-label'); lbl.textContent = '\uD83C\uDFB5';
+        slot.appendChild(lbl);
         slot.onclick = function(){
           if(state.solved || state.isPlaying) return;
-          // Click filled slot to hear it
           playPieceAudio(state.frame[slotIdx]);
         };
       } else {
-        slot.textContent = (slotIdx + 1);
+        // Empty slot - show outline shape
+        var svg = createPieceSVG(pieceSize, edges, 'rgba(15,52,96,0.6)', '#333');
+        svg.classList.add('slot-bg');
+        svg.style.position = 'absolute';
+        svg.style.inset = '0';
+        slot.appendChild(svg);
+        var lbl = ce('span','slot-label'); lbl.textContent = (slotIdx + 1);
+        slot.appendChild(lbl);
+
+        // Highlight if a piece is selected (awaiting placement)
+        if(state.selectedPiece !== null){
+          slot.classList.add('awaiting');
+        }
+
         slot.onclick = function(){
           if(state.solved || state.isPlaying) return;
           if(state.selectedPiece !== null){
+            placePiece(slotIdx);
+          }
+        };
+
+        // Drop target for drag
+        slot.ondragover = function(e){ e.preventDefault(); slot.classList.add('drop-target'); };
+        slot.ondragleave = function(){ slot.classList.remove('drop-target'); };
+        slot.ondrop = function(e){
+          e.preventDefault();
+          slot.classList.remove('drop-target');
+          var pieceId = parseInt(e.dataTransfer.getData('text/plain'));
+          if(!isNaN(pieceId)){
+            state.selectedPiece = pieceId;
             placePiece(slotIdx);
           }
         };
@@ -273,22 +421,51 @@ function render(){
 
   // Piece Pool
   if(state.pool.length > 0 && !state.solved){
-    var pl = ce('div','pool-label'); pl.textContent = 'Pieces (' + state.pool.length + ' remaining) \u2014 tap to listen, then tap a slot';
+    var pl = ce('div','pool-label');
+    if(state.selectedPiece !== null){
+      pl.textContent = '\u261D Piece selected! Tap an empty slot above to place it.';
+      pl.style.color = '#ffd700';
+    } else {
+      pl.textContent = 'Pieces (' + state.pool.length + ' remaining) \u2014 tap to listen & select';
+    }
     app.appendChild(pl);
 
     var pool = ce('div','piece-pool');
-    var poolCols = Math.min(state.pool.length, cols);
-    pool.style.gridTemplateColumns = 'repeat('+poolCols+', 1fr)';
-    pool.style.maxWidth = Math.min(poolCols * 52, 480) + 'px';
 
     state.pool.forEach(function(pieceId){
       var piece = ce('div','piece');
+      var edges = state.edgeMap[pieceId] || {top:0,right:0,bottom:0,left:0};
+
       if(state.selectedPiece === pieceId) piece.classList.add('selected');
-      piece.innerHTML = '<span class="note-icon">\uD83C\uDFB5</span>';
+
+      // Render jigsaw shape
+      var svg = createPieceSVG(40, edges, state.selectedPiece===pieceId ? '#ffd700' : '#4361ee', state.selectedPiece===pieceId ? '#ffed4a' : '#5a7afe');
+      piece.appendChild(svg);
+      var lbl = ce('div','piece-label'); lbl.textContent = '\uD83C\uDFB5';
+      piece.appendChild(lbl);
+
+      // Draggable
+      piece.draggable = true;
+      piece.ondragstart = function(e){
+        e.dataTransfer.setData('text/plain', pieceId.toString());
+        piece.classList.add('dragging');
+        state.selectedPiece = pieceId;
+        // Highlight all empty slots
+        setTimeout(function(){
+          document.querySelectorAll('.frame-slot:not(.filled)').forEach(function(s){ s.classList.add('awaiting'); });
+        }, 50);
+      };
+      piece.ondragend = function(){
+        piece.classList.remove('dragging');
+        document.querySelectorAll('.frame-slot').forEach(function(s){ s.classList.remove('awaiting','drop-target'); });
+      };
+
+      // Click to select/deselect + play audio
       piece.onclick = function(e){
         e.stopPropagation();
         if(state.isPlaying) return;
         if(state.selectedPiece === pieceId){
+          // Deselect
           state.selectedPiece = null;
           render();
         } else {
@@ -297,6 +474,41 @@ function render(){
           playPieceAudio(pieceId);
         }
       };
+
+      // Touch drag support for mobile
+      var touchData = null;
+      piece.ontouchstart = function(e){
+        touchData = {id: pieceId, startX: e.touches[0].clientX, startY: e.touches[0].clientY, moved: false};
+        state.selectedPiece = pieceId;
+      };
+      piece.ontouchmove = function(e){
+        if(!touchData) return;
+        var dx = e.touches[0].clientX - touchData.startX;
+        var dy = e.touches[0].clientY - touchData.startY;
+        if(Math.abs(dx) > 10 || Math.abs(dy) > 10) touchData.moved = true;
+      };
+      piece.ontouchend = function(e){
+        if(!touchData) return;
+        if(!touchData.moved){
+          // Just a tap - select and play
+          if(state.isPlaying){ touchData = null; return; }
+          render();
+          playPieceAudio(pieceId);
+        } else {
+          // Was a drag - find slot under finger
+          var touch = e.changedTouches[0];
+          var el = document.elementFromPoint(touch.clientX, touch.clientY);
+          if(el){
+            var slot = el.closest('.frame-slot');
+            if(slot && !slot.classList.contains('filled')){
+              var slotIdx = parseInt(slot.dataset.slot);
+              placePiece(slotIdx);
+            }
+          }
+        }
+        touchData = null;
+      };
+
       pool.appendChild(piece);
     });
     app.appendChild(pool);
@@ -317,7 +529,7 @@ function render(){
 
   // Instructions
   var ins = ce('div','instructions');
-  ins.textContent = 'Tap a piece to hear its melody segment. Then tap an empty slot to place it. Arrange all pieces in correct order to complete the melody!';
+  ins.textContent = 'Tap a piece to hear it, then tap a slot to place. Or drag pieces into the frame. Pieces only fit in their correct position!';
   app.appendChild(ins);
 
   // Toast
@@ -360,21 +572,21 @@ function placePiece(slotIdx){
   var pieceId = state.selectedPiece;
   var piece = state.pieces[pieceId];
 
-  // Check if correct position
   if(piece.correctIndex === slotIdx){
     state.frame[slotIdx] = pieceId;
     state.pool = state.pool.filter(function(id){ return id !== pieceId; });
     state.selectedPiece = null;
-    // Check if solved
     if(state.pool.length === 0){
       state.solved = true;
     }
     render();
     if(state.solved){
       setTimeout(function(){ playFullMelody(); }, 500);
+    } else {
+      toast('\u2705 Correct!');
     }
   } else {
-    toast('Wrong position! Try again.');
+    toast('\u274C Wrong slot! Listen again.');
     state.selectedPiece = null;
     render();
   }
@@ -385,11 +597,8 @@ function playFullMelody(){
   state.isPlaying = true;
   var melody = MELODIES[state.melodyName];
   var allNotes = melody.notes;
-  var beatDur = 60 / melody.bpm;
 
-  // Calculate which notes belong to which piece for highlighting
   var noteTopiece = [];
-  var noteIdx = 0;
   for(var p=0; p<state.pieces.length; p++){
     for(var n=0; n<state.pieces[p].notes.length; n++){
       noteTopiece.push(p);
@@ -398,14 +607,12 @@ function playFullMelody(){
 
   var slots = document.querySelectorAll('.frame-slot');
   playNotes(allNotes, melody.bpm, function(idx){
-    // Highlight the piece this note belongs to
     var pieceId = noteTopiece[idx];
     if(pieceId !== undefined){
       slots.forEach(function(s){ s.classList.remove('highlight'); });
-      // Find slot containing this piece
       for(var i=0; i<state.frame.length; i++){
         if(state.frame[i] === pieceId){
-          slots[i].classList.add('highlight');
+          if(slots[i]) slots[i].classList.add('highlight');
           break;
         }
       }
@@ -421,6 +628,9 @@ function startGame(melodyName, pieceCount){
   if(!melody) melodyName = Object.keys(MELODIES)[0];
   melody = MELODIES[melodyName];
 
+  var cols = Math.ceil(Math.sqrt(pieceCount));
+  var rows = Math.ceil(pieceCount / cols);
+
   state.melodyName = melodyName;
   state.pieceCount = pieceCount;
   state.pieces = splitMelody(melody.notes, pieceCount);
@@ -432,6 +642,9 @@ function startGame(melodyName, pieceCount){
   state.startTime = 0;
   state.timerStarted = false;
   state.isPlaying = false;
+  state.cols = cols;
+  state.rows = rows;
+  state.edgeMap = generateEdgeMap(cols, rows, pieceCount);
   render();
 }
 
