@@ -370,7 +370,7 @@ function render(){
   // Shape hints toggle
   var toggleRow = ce('div','controls');
   var shapeBtn = ce('button');
-  shapeBtn.textContent = state.showShapes ? '\uD83E\uDDE9 Shapes: ON' : '\u25A2 Shapes: OFF';
+  shapeBtn.textContent = state.showShapes ? '\uD83E\uDDE9 Board Hints: ON' : '\u25A2 Board Hints: OFF';
   shapeBtn.style.background = state.showShapes ? '#2ecc71' : '#555';
   shapeBtn.onclick = function(){ state.showShapes = !state.showShapes; render(); };
   toggleRow.appendChild(shapeBtn);
@@ -497,17 +497,9 @@ function render(){
 
       if(state.selectedPiece === pieceId) piece.classList.add('selected');
 
-      // Render piece shape
-      if(state.showShapes){
-        var svg = createPieceSVG(40, edges, state.selectedPiece===pieceId ? '#ffd700' : '#4361ee', state.selectedPiece===pieceId ? '#ffed4a' : '#5a7afe');
-        piece.appendChild(svg);
-      } else {
-        piece.style.width = '48px';
-        piece.style.height = '48px';
-        piece.style.borderRadius = '8px';
-        piece.style.background = state.selectedPiece===pieceId ? '#ffd700' : '#4361ee';
-        piece.style.border = '2px solid ' + (state.selectedPiece===pieceId ? '#ffed4a' : '#5a7afe');
-      }
+      // Pool tiles always show jigsaw shapes (like real puzzle pieces)
+      var svg = createPieceSVG(40, edges, state.selectedPiece===pieceId ? '#ffd700' : '#4361ee', state.selectedPiece===pieceId ? '#ffed4a' : '#5a7afe');
+      piece.appendChild(svg);
       var lbl = ce('div','piece-label'); lbl.textContent = '\uD83C\uDFB5';
       piece.appendChild(lbl);
 
