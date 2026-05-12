@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auzle · Audio Jigsaw</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;min-height:100vh;display:flex;justify-content:center;color:#fff}
+#app{max-width:600px;width:100%;padding:16px}
+.top-bar{text-align:center;padding:12px 0;border-bottom:1px solid #333;margin-bottom:16px}
+.top-bar h1{font-size:20px;letter-spacing:1px;color:#fff}
+.top-bar .tagline{font-size:12px;color:#888;margin-top:4px}
+.controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.controls select,.controls button{padding:8px 16px;border-radius:8px;border:1px solid #444;background:#2a2a3e;color:#fff;font-size:13px;cursor:pointer}
+.controls button{background:#4361ee;border:none;font-weight:600}
+.controls button:hover{background:#3a56d4}
+
+/* Jigsaw Frame */
+.frame-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#888;margin:12px 0 8px;font-weight:600;text-align:center}
+.jigsaw-frame{display:grid;gap:3px;margin:0 auto 20px;padding:8px;background:#16213e;border-radius:12px;border:2px solid #4361ee}
+.frame-slot{aspect-ratio:1;border-radius:6px;background:#0f3460;border:2px dashed #333;display:flex;align-items:center;justify-content:center;font-size:11px;color:#555;transition:all .2s;cursor:pointer;position:relative;overflow:hidden}
+.frame-slot.filled{border:2px solid #4361ee;background:#1a1a4e}
+.frame-slot.filled .piece-inner{opacity:1}
+.frame-slot.highlight{animation:glow 0.5s ease;border-color:#ffd700;box-shadow:0 0 12px rgba(255,215,0,0.5)}
+.frame-slot.drop-target{border-color:#2ecc71;background:#0f3460;box-shadow:0 0 8px rgba(46,204,113,0.3)}
+@keyframes glow{0%,100%{box-shadow:0 0 4px rgba(255,215,0,0.3)}50%{box-shadow:0 0 16px rgba(255,215,0,0.7)}}
+
+/* Piece Pool */
+.pool-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#888;margin:12px 0 8px;font-weight:600;text-align:center}
+.piece-pool{display:grid;gap:4px;margin:0 auto;padding:8px;background:#16213e;border-radius:12px;min-height:60px}
+.piece{aspect-ratio:1;border-radius:8px;background:linear-gradient(135deg,#4361ee,#3a56d4);border:2px solid #5a7afe;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;position:relative;user-select:none}
+.piece:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(67,97,238,0.4)}
+.piece.selected{border-color:#ffd700;box-shadow:0 0 12px rgba(255,215,0,0.5);transform:scale(1.08)}
+.piece.playing{animation:pulse-piece 0.6s infinite}
+.piece .piece-num{font-size:10px;font-weight:700;color:rgba(255,255,255,0.9)}
+.piece .note-icon{font-size:16px}
+@keyframes pulse-piece{0%,100%{box-shadow:0 0 4px rgba(67,97,238,0.4)}50%{box-shadow:0 0 16px rgba(67,97,238,0.8)}}
+
+/* Placed piece in frame */
+.piece-inner{width:100%;height:100%;border-radius:4px;background:linear-gradient(135deg,#4361ee,#3a56d4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s}
+.piece-inner .note-icon{font-size:14px}
+
+/* Result */
+.result{text-align:center;padding:16px 0;font-size:18px;font-weight:600}
+.result.win{color:#2ecc71}
+.stats{display:flex;justify-content:center;gap:24px;padding:8px 0;color:#aaa;font-size:13px}
+.play-full-btn{display:block;margin:12px auto;padding:10px 24px;border-radius:8px;border:none;background:#2ecc71;color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+.play-full-btn:hover{background:#27ae60}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100}
+.toast.show{opacity:1}
+.instructions{text-align:center;padding:12px 0;font-size:12px;color:#666;border-top:1px solid #222;margin-top:16px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+
+// === MELODIES (note arrays: [frequency, duration in beats]) ===
+var MELODIES = {
+  'Twinkle Twinkle': {
+    bpm: 120,
+    notes: [
+      [262,1],[262,1],[392,1],[392,1],[440,1],[440,1],[392,2],
+      [349,1],[349,1],[330,1],[330,1],[294,1],[294,1],[262,2],
+      [392,1],[392,1],[349,1],[349,1],[330,1],[330,1],[294,2],
+      [392,1],[392,1],[349,1],[349,1],[330,1],[330,1],[294,2],
+      [262,1],[262,1],[392,1],[392,1],[440,1],[440,1],[392,2],
+      [349,1],[349,1],[330,1],[330,1],[294,1],[294,1],[262,2]
+    ]
+  },
+  'Mary Had a Little Lamb': {
+    bpm: 140,
+    notes: [
+      [330,1],[294,1],[262,1],[294,1],[330,1],[330,1],[330,2],
+      [294,1],[294,1],[294,2],[330,1],[392,1],[392,2],
+      [330,1],[294,1],[262,1],[294,1],[330,1],[330,1],[330,1],[330,1],
+      [294,1],[294,1],[330,1],[294,1],[262,2]
+    ]
+  },
+  'Ode to Joy': {
+    bpm: 120,
+    notes: [
+      [330,1],[330,1],[349,1],[392,1],[392,1],[349,1],[330,1],[294,1],
+      [262,1],[262,1],[294,1],[330,1],[330,1.5],[294,0.5],[294,2],
+      [330,1],[330,1],[349,1],[392,1],[392,1],[349,1],[330,1],[294,1],
+      [262,1],[262,1],[294,1],[330,1],[294,1.5],[262,0.5],[262,2]
+    ]
+  },
+  'Happy Birthday': {
+    bpm: 100,
+    notes: [
+      [262,0.75],[262,0.25],[294,1],[262,1],[349,1],[330,2],
+      [262,0.75],[262,0.25],[294,1],[262,1],[392,1],[349,2],
+      [262,0.75],[262,0.25],[523,1],[440,1],[349,1],[330,1],[294,2],
+      [466,0.75],[466,0.25],[440,1],[349,1],[392,1],[349,2]
+    ]
+  }
+};
+
+var PIECE_COUNTS = [6, 9, 12, 16, 24, 32];
+
+// === AUDIO ENGINE ===
+var actx = null;
+function ensureAudio(){
+  if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if(actx.state==='suspended') actx.resume();
+}
+
+function playNotes(notes, bpm, onNote, onDone){
+  ensureAudio();
+  var beatDur = 60 / bpm;
+  var t = actx.currentTime + 0.02;
+  var totalDur = 0;
+  for(var i=0; i<notes.length; i++){
+    var freq = notes[i][0], dur = notes[i][1] * beatDur;
+    var osc = actx.createOscillator();
+    var gain = actx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    gain.connect(actx.destination);
+    // Piano-like envelope
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.3, t + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + dur * 0.95);
+    gain.gain.linearRampToValueAtTime(0, t + dur);
+    osc.start(t);
+    osc.stop(t + dur);
+    // Schedule highlight callback
+    if(onNote){
+      (function(idx, time){
+        setTimeout(function(){ onNote(idx); }, (time - actx.currentTime) * 1000);
+      })(i, t);
+    }
+    t += dur;
+    totalDur = t - actx.currentTime;
+  }
+  if(onDone) setTimeout(onDone, totalDur * 1000 + 100);
+}
+
+// === GAME STATE ===
+var state = {
+  melody: null,
+  melodyName: '',
+  pieceCount: 12,
+  pieces: [],       // array of {id, notes, correctIndex}
+  frame: [],        // array of pieceId or null (length = pieceCount)
+  pool: [],         // array of piece ids still in pool
+  selectedPiece: null,
+  solved: false,
+  moves: 0,
+  startTime: 0,
+  timerStarted: false,
+  isPlaying: false
+};
+
+// === SPLIT MELODY INTO PIECES ===
+function splitMelody(notes, count){
+  var pieces = [];
+  var totalBeats = 0;
+  for(var i=0; i<notes.length; i++) totalBeats += notes[i][1];
+  var beatsPerPiece = totalBeats / count;
+  var currentPiece = [];
+  var currentBeats = 0;
+  var pieceIdx = 0;
+  for(var i=0; i<notes.length; i++){
+    currentPiece.push(notes[i]);
+    currentBeats += notes[i][1];
+    if(currentBeats >= beatsPerPiece * (pieceIdx + 1) - 0.01 || i === notes.length - 1){
+      pieces.push({id: pieceIdx, notes: currentPiece.slice(), correctIndex: pieceIdx});
+      currentPiece = [];
+      pieceIdx++;
+      if(pieceIdx >= count - 1 && i < notes.length - 1){
+        // Last piece gets remaining notes
+        pieces.push({id: pieceIdx, notes: notes.slice(i+1), correctIndex: pieceIdx});
+        break;
+      }
+    }
+  }
+  // Ensure we have exactly count pieces
+  while(pieces.length < count) pieces.push({id: pieces.length, notes: [[262, 0.5]], correctIndex: pieces.length});
+  return pieces.slice(0, count);
+}
+
+// === SHUFFLE ===
+function shuffle(arr){
+  arr = arr.slice();
+  for(var i=arr.length-1; i>0; i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t=arr[i]; arr[i]=arr[j]; arr[j]=t;
+  }
+  return arr;
+}
+
+// === RENDER ===
+function ce(tag, cls){var e=document.createElement(tag);if(cls)e.className=cls;return e;}
+
+function render(){
+  var app = document.getElementById('app');
+  app.innerHTML = '';
+
+  // Top bar
+  var tb = ce('div','top-bar');
+  tb.innerHTML = '<h1>\uD83E\uDDE9 Auzle \u00B7 Audio Jigsaw</h1><div class="tagline">Listen \u00B7 Arrange \u00B7 Complete the melody</div>';
+  app.appendChild(tb);
+
+  // Controls
+  var ctrl = ce('div','controls');
+  var melSel = ce('select');
+  Object.keys(MELODIES).forEach(function(name){
+    var opt = ce('option'); opt.value = name; opt.textContent = name;
+    if(name === state.melodyName) opt.selected = true;
+    melSel.appendChild(opt);
+  });
+  melSel.onchange = function(){ startGame(melSel.value, state.pieceCount); };
+
+  var pcSel = ce('select');
+  PIECE_COUNTS.forEach(function(n){
+    var opt = ce('option'); opt.value = n; opt.textContent = n + ' pieces';
+    if(n === state.pieceCount) opt.selected = true;
+    pcSel.appendChild(opt);
+  });
+  pcSel.onchange = function(){ startGame(state.melodyName, parseInt(pcSel.value)); };
+
+  var newBtn = ce('button'); newBtn.textContent = '\u{1F504} New Game';
+  newBtn.onclick = function(){ startGame(state.melodyName, state.pieceCount); };
+
+  ctrl.appendChild(melSel); ctrl.appendChild(pcSel); ctrl.appendChild(newBtn);
+  app.appendChild(ctrl);
+
+  // Compute grid columns
+  var cols = Math.ceil(Math.sqrt(state.pieceCount));
+  var rows = Math.ceil(state.pieceCount / cols);
+
+  // Jigsaw Frame
+  var fl = ce('div','frame-label'); fl.textContent = 'Jigsaw Frame \u2014 ' + state.melodyName;
+  app.appendChild(fl);
+
+  var frame = ce('div','jigsaw-frame');
+  frame.style.gridTemplateColumns = 'repeat('+cols+', 1fr)';
+  frame.style.maxWidth = Math.min(cols * 52, 480) + 'px';
+
+  for(var i=0; i<state.pieceCount; i++){
+    (function(slotIdx){
+      var slot = ce('div','frame-slot');
+      if(state.frame[slotIdx] !== null){
+        slot.classList.add('filled');
+        var inner = ce('div','piece-inner');
+        inner.innerHTML = '<span class="note-icon">\uD83C\uDFB5</span>';
+        slot.appendChild(inner);
+        slot.onclick = function(){
+          if(state.solved || state.isPlaying) return;
+          // Click filled slot to hear it
+          playPieceAudio(state.frame[slotIdx]);
+        };
+      } else {
+        slot.textContent = (slotIdx + 1);
+        slot.onclick = function(){
+          if(state.solved || state.isPlaying) return;
+          if(state.selectedPiece !== null){
+            placePiece(slotIdx);
+          }
+        };
+      }
+      slot.dataset.slot = slotIdx;
+      frame.appendChild(slot);
+    })(i);
+  }
+  app.appendChild(frame);
+
+  // Piece Pool
+  if(state.pool.length > 0 && !state.solved){
+    var pl = ce('div','pool-label'); pl.textContent = 'Pieces (' + state.pool.length + ' remaining) \u2014 tap to listen, then tap a slot';
+    app.appendChild(pl);
+
+    var pool = ce('div','piece-pool');
+    var poolCols = Math.min(state.pool.length, cols);
+    pool.style.gridTemplateColumns = 'repeat('+poolCols+', 1fr)';
+    pool.style.maxWidth = Math.min(poolCols * 52, 480) + 'px';
+
+    state.pool.forEach(function(pieceId){
+      var piece = ce('div','piece');
+      if(state.selectedPiece === pieceId) piece.classList.add('selected');
+      piece.innerHTML = '<span class="note-icon">\uD83C\uDFB5</span>';
+      piece.onclick = function(e){
+        e.stopPropagation();
+        if(state.isPlaying) return;
+        if(state.selectedPiece === pieceId){
+          state.selectedPiece = null;
+          render();
+        } else {
+          state.selectedPiece = pieceId;
+          render();
+          playPieceAudio(pieceId);
+        }
+      };
+      pool.appendChild(piece);
+    });
+    app.appendChild(pool);
+  }
+
+  // Result
+  if(state.solved){
+    var rd = ce('div','result win');
+    var elapsed = Math.floor((Date.now() - state.startTime)/1000);
+    rd.innerHTML = '\u2705 Melody Complete!<div class="stats"><span>\u23F1 '+Math.floor(elapsed/60)+':'+String(elapsed%60).padStart(2,'0')+'</span><span>\uD83D\uDD00 '+state.moves+' moves</span></div>';
+    app.appendChild(rd);
+
+    var playBtn = ce('button','play-full-btn');
+    playBtn.textContent = '\u25B6 Play Full Melody';
+    playBtn.onclick = function(){ playFullMelody(); };
+    app.appendChild(playBtn);
+  }
+
+  // Instructions
+  var ins = ce('div','instructions');
+  ins.textContent = 'Tap a piece to hear its melody segment. Then tap an empty slot to place it. Arrange all pieces in correct order to complete the melody!';
+  app.appendChild(ins);
+
+  // Toast
+  if(!document.getElementById('toast-el')){
+    var toastEl = ce('div','toast');
+    toastEl.id = 'toast-el';
+    document.body.appendChild(toastEl);
+  }
+}
+
+function toast(msg){
+  var el = document.getElementById('toast-el');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 2000);
+}
+
+function playPieceAudio(pieceId){
+  if(state.isPlaying) return;
+  var piece = state.pieces[pieceId];
+  if(!piece || piece.notes.length === 0) return;
+  state.isPlaying = true;
+  if(!state.timerStarted){
+    state.timerStarted = true;
+    state.startTime = Date.now();
+  }
+  playNotes(piece.notes, MELODIES[state.melodyName].bpm, null, function(){
+    state.isPlaying = false;
+  });
+}
+
+function placePiece(slotIdx){
+  if(state.selectedPiece === null) return;
+  if(state.frame[slotIdx] !== null){
+    toast('Slot already filled!');
+    return;
+  }
+  state.moves++;
+  var pieceId = state.selectedPiece;
+  var piece = state.pieces[pieceId];
+
+  // Check if correct position
+  if(piece.correctIndex === slotIdx){
+    state.frame[slotIdx] = pieceId;
+    state.pool = state.pool.filter(function(id){ return id !== pieceId; });
+    state.selectedPiece = null;
+    // Check if solved
+    if(state.pool.length === 0){
+      state.solved = true;
+    }
+    render();
+    if(state.solved){
+      setTimeout(function(){ playFullMelody(); }, 500);
+    }
+  } else {
+    toast('Wrong position! Try again.');
+    state.selectedPiece = null;
+    render();
+  }
+}
+
+function playFullMelody(){
+  if(state.isPlaying) return;
+  state.isPlaying = true;
+  var melody = MELODIES[state.melodyName];
+  var allNotes = melody.notes;
+  var beatDur = 60 / melody.bpm;
+
+  // Calculate which notes belong to which piece for highlighting
+  var noteTopiece = [];
+  var noteIdx = 0;
+  for(var p=0; p<state.pieces.length; p++){
+    for(var n=0; n<state.pieces[p].notes.length; n++){
+      noteTopiece.push(p);
+    }
+  }
+
+  var slots = document.querySelectorAll('.frame-slot');
+  playNotes(allNotes, melody.bpm, function(idx){
+    // Highlight the piece this note belongs to
+    var pieceId = noteTopiece[idx];
+    if(pieceId !== undefined){
+      slots.forEach(function(s){ s.classList.remove('highlight'); });
+      // Find slot containing this piece
+      for(var i=0; i<state.frame.length; i++){
+        if(state.frame[i] === pieceId){
+          slots[i].classList.add('highlight');
+          break;
+        }
+      }
+    }
+  }, function(){
+    state.isPlaying = false;
+    document.querySelectorAll('.frame-slot').forEach(function(s){ s.classList.remove('highlight'); });
+  });
+}
+
+function startGame(melodyName, pieceCount){
+  var melody = MELODIES[melodyName];
+  if(!melody) melodyName = Object.keys(MELODIES)[0];
+  melody = MELODIES[melodyName];
+
+  state.melodyName = melodyName;
+  state.pieceCount = pieceCount;
+  state.pieces = splitMelody(melody.notes, pieceCount);
+  state.frame = new Array(pieceCount).fill(null);
+  state.pool = shuffle(state.pieces.map(function(p){ return p.id; }));
+  state.selectedPiece = null;
+  state.solved = false;
+  state.moves = 0;
+  state.startTime = 0;
+  state.timerStarted = false;
+  state.isPlaying = false;
+  render();
+}
+
+// Init
+startGame('Twinkle Twinkle', 6);
+
+})();
+</script>
+</body>
+</html>
