@@ -641,8 +641,6 @@ function placePiece(slotIdx){
     render();
     if(state.solved){
       setTimeout(function(){ playFullMelody(); }, 500);
-    } else {
-      toast('\u2705 Correct!');
     }
   } else {
     toast('\u274C Wrong slot! Listen again.');
