@@ -339,7 +339,21 @@ function render(){
   var newBtn = ce('button'); newBtn.textContent = '\u{1F504} New Game';
   newBtn.onclick = function(){ startGame(state.melodyName, state.pieceCount); };
 
-  ctrl.appendChild(melSel); ctrl.appendChild(pcSel); ctrl.appendChild(newBtn);
+  var playMelBtn = ce('button'); playMelBtn.textContent = '\u25B6 Play Melody';
+  playMelBtn.onclick = function(){
+    if(state.isPlaying) return;
+    state.isPlaying = true;
+    playMelBtn.textContent = '\u23F9 Playing...';
+    playMelBtn.style.background = '#e74c3c';
+    var melody = MELODIES[state.melodyName];
+    playNotes(melody.notes, melody.bpm, null, function(){
+      state.isPlaying = false;
+      playMelBtn.textContent = '\u25B6 Play Melody';
+      playMelBtn.style.background = '';
+    });
+  };
+
+  ctrl.appendChild(melSel); ctrl.appendChild(pcSel); ctrl.appendChild(newBtn); ctrl.appendChild(playMelBtn);
   app.appendChild(ctrl);
 
   var cols = state.cols, rows = state.rows;
