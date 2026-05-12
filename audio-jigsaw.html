@@ -3,57 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ausaw · Audio Jigsaw</title>
+<title>Auzle · Ausaw</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;min-height:100vh;display:flex;justify-content:center;color:#fff}
-#app{max-width:600px;width:100%;padding:16px}
-.top-bar{text-align:center;padding:12px 0;border-bottom:1px solid #333;margin-bottom:16px}
-.top-bar h1{font-size:20px;letter-spacing:1px;color:#fff}
-.top-bar .tagline{font-size:12px;color:#888;margin-top:4px}
-.controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
-.controls select,.controls button{padding:8px 16px;border-radius:8px;border:1px solid #444;background:#2a2a3e;color:#fff;font-size:13px;cursor:pointer}
-.controls button{background:#4361ee;border:none;font-weight:600}
-.controls button:hover{background:#3a56d4}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f9fa;display:flex;justify-content:center;min-height:100vh}
+#app{max-width:520px;width:100%;padding:16px;background:#fff;min-height:100vh}
+.top-bar{text-align:center;padding:12px 0;border-bottom:1px solid #eee;margin-bottom:12px}
+.top-bar h1{font-size:18px;color:#1a1a2e;letter-spacing:1px}
+.top-bar .subtitle{font-size:11px;color:#888;margin-top:2px}
+.top-bar .day-info{font-size:12px;color:#4361ee;margin-top:4px;font-weight:600}
+.diff-tabs{display:flex;justify-content:center;gap:8px;margin-bottom:12px}
+.diff-tab{padding:6px 18px;border-radius:20px;border:2px solid #e0e0e0;background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:#666}
+.diff-tab:hover{border-color:#4361ee;color:#4361ee}
+.diff-tab.active{border-color:#4361ee;background:#4361ee;color:#fff}
+.timer{text-align:center;font-size:15px;color:#666;margin-bottom:10px;font-variant-numeric:tabular-nums;font-weight:500}
+.timer span{background:#f0f4ff;padding:4px 12px;border-radius:6px}
+.section-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;margin:12px 0 8px;font-weight:600}
+.melody-info{text-align:center;padding:10px;background:#f0f4ff;border-radius:10px;margin-bottom:12px}
+.melody-info .name{font-size:14px;font-weight:600;color:#333}
+.melody-info .lang{font-size:11px;color:#4361ee;margin-top:2px}
+.play-melody-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 auto;padding:8px 20px;border-radius:8px;border:2px solid #4361ee;background:#fff;color:#4361ee;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:8px}
+.play-melody-btn:hover{background:#4361ee;color:#fff}
+.play-melody-btn.playing{background:#4361ee;color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(67,97,238,.3)}50%{box-shadow:0 0 0 8px rgba(67,97,238,0)}}
 
 /* Jigsaw Frame */
-.frame-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#888;margin:12px 0 8px;font-weight:600;text-align:center}
-.jigsaw-frame{display:grid;gap:0;margin:0 auto 20px;padding:12px;background:#16213e;border-radius:12px;border:2px solid #4361ee}
-.frame-slot{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
-.frame-slot .slot-bg{position:absolute;inset:0;opacity:0.4}
-.frame-slot .slot-label{position:relative;z-index:1;font-size:11px;color:#555;font-weight:700}
-.frame-slot.filled .slot-bg{opacity:1}
-.frame-slot.filled .slot-label{color:rgba(255,255,255,0.9)}
-.frame-slot.highlight .slot-bg{filter:brightness(1.5)}
-.frame-slot.highlight{animation:glow 0.5s ease}
-.frame-slot.drop-target .slot-bg{filter:brightness(1.3)}
-.frame-slot.awaiting{animation:pulse-slot 1s infinite}
-@keyframes glow{0%,100%{filter:drop-shadow(0 0 4px rgba(255,215,0,0.3))}50%{filter:drop-shadow(0 0 12px rgba(255,215,0,0.7))}}
-@keyframes pulse-slot{0%,100%{filter:drop-shadow(0 0 2px rgba(46,204,113,0.3))}50%{filter:drop-shadow(0 0 8px rgba(46,204,113,0.6))}}
+.frame-wrap{margin:16px 0}
+.jigsaw-frame{display:grid;gap:3px;margin:0 auto;padding:8px;background:#f0f4ff;border-radius:12px;border:2px solid #e0e0e0;width:fit-content}
+.frame-slot{border-radius:4px;background:#e8ecf4;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;transition:all .2s;cursor:pointer;position:relative;font-weight:700}
+.frame-slot.filled{border:2px solid #4361ee;background:#dce4ff;color:#4361ee}
+.frame-slot.highlight{border-color:#ffd700;background:#fff8e1;animation:glow .5s}
+.frame-slot.awaiting{border-color:#2ecc71;background:#e8f8f0;animation:pulse-slot 1s infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 4px rgba(255,215,0,.3)}50%{box-shadow:0 0 12px rgba(255,215,0,.6)}}
+@keyframes pulse-slot{0%,100%{box-shadow:inset 0 0 4px rgba(46,204,113,.2)}50%{box-shadow:inset 0 0 8px rgba(46,204,113,.4)}}
 
 /* Piece Pool */
-.pool-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#888;margin:12px 0 8px;font-weight:600;text-align:center}
-.piece-pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 auto;padding:12px;background:#16213e;border-radius:12px;min-height:60px}
-.piece{width:56px;height:56px;position:relative;cursor:pointer;transition:all .15s;user-select:none;-webkit-tap-highlight-color:transparent}
-.piece:hover{transform:scale(1.1);filter:drop-shadow(0 4px 8px rgba(67,97,238,0.5))}
-.piece.selected{transform:scale(1.15);filter:drop-shadow(0 0 12px rgba(255,215,0,0.7))}
-.piece.playing{animation:pulse-piece 0.6s infinite}
-.piece .piece-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;pointer-events:none}
-@keyframes pulse-piece{0%,100%{filter:drop-shadow(0 0 4px rgba(67,97,238,0.4))}50%{filter:drop-shadow(0 0 12px rgba(67,97,238,0.8))}}
-
-/* Dragging */
-.piece.dragging{opacity:0.5;transform:scale(0.9)}
-.drag-ghost{position:fixed;pointer-events:none;z-index:1000;opacity:0.85;transform:translate(-50%,-50%)}
+.pool-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;margin:12px 0 8px;font-weight:600;text-align:center}
+.pool-label.active{color:#4361ee}
+.piece-pool{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:10px;background:#fafafa;border-radius:10px;min-height:50px}
+.piece{width:42px;height:42px;border-radius:8px;background:#fff;border:2px solid #4361ee;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;user-select:none;font-size:16px}
+.piece:hover{transform:scale(1.08);box-shadow:0 2px 8px rgba(67,97,238,.3)}
+.piece.selected{background:#4361ee;color:#fff;transform:scale(1.1);box-shadow:0 0 10px rgba(67,97,238,.4)}
 
 /* Result */
 .result{text-align:center;padding:16px 0;font-size:18px;font-weight:600}
-.result.win{color:#2ecc71}
-.stats{display:flex;justify-content:center;gap:24px;padding:8px 0;color:#aaa;font-size:13px}
-.play-full-btn{display:block;margin:12px auto;padding:10px 24px;border-radius:8px;border:none;background:#2ecc71;color:#fff;font-size:14px;font-weight:600;cursor:pointer}
-.play-full-btn:hover{background:#27ae60}
+.result.win{color:#27ae60}
+.stats{display:flex;justify-content:center;gap:24px;padding:8px 0;color:#666;font-size:13px}
+.share-btn{display:block;margin:12px auto;padding:10px 28px;border-radius:8px;border:none;background:#4361ee;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}
+.share-btn:hover{background:#3a56d4}
+.board-hint-btn{display:block;margin:8px auto;padding:6px 16px;border-radius:16px;border:1px solid #ddd;background:#fafafa;font-size:11px;color:#888;cursor:pointer}
+.board-hint-btn:hover{background:#f0f0f0}
+.instructions{text-align:center;padding:12px 0;font-size:11px;color:#bbb;border-top:1px solid #f0f0f0;margin-top:16px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100}
 .toast.show{opacity:1}
-.instructions{text-align:center;padding:12px 0;font-size:12px;color:#666;border-top:1px solid #222;margin-top:16px}
 </style>
 </head>
 <body>
@@ -62,241 +64,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 (function(){
 'use strict';
 
-// === MELODIES (Public Domain, multi-language) ===
-var MELODIES = {
-  // English
-  'Twinkle Twinkle (English)': {
-    bpm: 120, lang: 'English',
-    notes: [[262,1],[262,1],[392,1],[392,1],[440,1],[440,1],[392,2],[349,1],[349,1],[330,1],[330,1],[294,1],[294,1],[262,2],[392,1],[392,1],[349,1],[349,1],[330,1],[330,1],[294,2],[392,1],[392,1],[349,1],[349,1],[330,1],[330,1],[294,2],[262,1],[262,1],[392,1],[392,1],[440,1],[440,1],[392,2],[349,1],[349,1],[330,1],[330,1],[294,1],[294,1],[262,2]]
-  },
-  'Mary Had a Little Lamb (English)': {
-    bpm: 140, lang: 'English',
-    notes: [[330,1],[294,1],[262,1],[294,1],[330,1],[330,1],[330,2],[294,1],[294,1],[294,2],[330,1],[392,1],[392,2],[330,1],[294,1],[262,1],[294,1],[330,1],[330,1],[330,1],[330,1],[294,1],[294,1],[330,1],[294,1],[262,2]]
-  },
-  'Ode to Joy (German)': {
-    bpm: 120, lang: 'German',
-    notes: [[330,1],[330,1],[349,1],[392,1],[392,1],[349,1],[330,1],[294,1],[262,1],[262,1],[294,1],[330,1],[330,1.5],[294,0.5],[294,2],[330,1],[330,1],[349,1],[392,1],[392,1],[349,1],[330,1],[294,1],[262,1],[262,1],[294,1],[330,1],[294,1.5],[262,0.5],[262,2]]
-  },
-  'Happy Birthday (English)': {
-    bpm: 100, lang: 'English',
-    notes: [[262,0.75],[262,0.25],[294,1],[262,1],[349,1],[330,2],[262,0.75],[262,0.25],[294,1],[262,1],[392,1],[349,2],[262,0.75],[262,0.25],[523,1],[440,1],[349,1],[330,1],[294,2],[466,0.75],[466,0.25],[440,1],[349,1],[392,1],[349,2]]
-  },
-  // French
-  'Frère Jacques (French)': {
-    bpm: 120, lang: 'French',
-    notes: [[262,1],[294,1],[330,1],[262,1],[262,1],[294,1],[330,1],[262,1],[330,1],[349,1],[392,2],[330,1],[349,1],[392,2],[392,0.75],[440,0.25],[392,0.5],[349,0.5],[330,1],[262,1],[392,0.75],[440,0.25],[392,0.5],[349,0.5],[330,1],[262,1],[262,1],[196,1],[262,2],[262,1],[196,1],[262,2]]
-  },
-  'Au Clair de la Lune (French)': {
-    bpm: 100, lang: 'French',
-    notes: [[262,1],[262,1],[262,1],[294,1],[330,2],[294,2],[262,1],[330,1],[294,1],[294,1],[262,2],[262,2],[262,1],[262,1],[262,1],[294,1],[330,2],[294,2],[262,1],[330,1],[294,1],[294,1],[262,2],[262,2]]
-  },
-  // German
-  'Alle Meine Entchen (German)': {
-    bpm: 130, lang: 'German',
-    notes: [[262,1],[294,1],[330,1],[349,1],[392,2],[392,2],[440,1],[440,1],[440,1],[440,1],[392,2],[392,2],[440,1],[440,1],[440,1],[440,1],[392,2],[392,2],[349,1],[349,1],[349,1],[349,1],[330,2],[330,2],[294,1],[294,1],[294,1],[294,1],[262,2],[262,2]]
-  },
-  // Hindi
-  'Lakdi Ki Kathi (Hindi)': {
-    bpm: 130, lang: 'Hindi',
-    notes: [[330,1],[330,1],[392,1],[392,1],[440,1],[392,1],[330,2],[294,1],[294,1],[330,1],[330,1],[262,2],[262,2],[330,1],[330,1],[392,1],[392,1],[440,1],[392,1],[330,2],[294,1],[330,1],[294,1],[262,1],[262,2],[262,2]]
-  },
-  'Machhli Jal Ki Rani (Hindi)': {
-    bpm: 120, lang: 'Hindi',
-    notes: [[330,1],[330,1],[294,1],[330,1],[392,2],[392,2],[440,1],[392,1],[349,1],[330,1],[294,2],[294,2],[330,1],[330,1],[294,1],[330,1],[392,2],[392,2],[349,1],[330,1],[294,1],[262,1],[262,2],[262,2]]
-  },
-  // Japanese
-  'Sakura Sakura (Japanese)': {
-    bpm: 80, lang: 'Japanese',
-    notes: [[330,2],[330,2],[349,2],[330,2],[330,2],[349,2],[330,1],[349,1],[392,2],[440,2],[392,1],[349,1],[330,1],[349,1],[294,2],[330,2],[330,2],[349,2],[330,2],[330,2],[349,2],[330,1],[349,1],[392,2],[440,2],[392,1],[349,1],[330,1],[294,1],[262,2]]
-  },
-  // Spanish
-  'Los Pollitos Dicen (Spanish)': {
-    bpm: 120, lang: 'Spanish',
-    notes: [[330,1],[330,1],[330,1],[294,1],[262,2],[262,2],[294,1],[294,1],[294,1],[262,1],[247,2],[247,2],[262,1],[294,1],[330,1],[349,1],[330,1],[294,1],[262,2],[262,2]]
-  },
-  'De Colores (Spanish)': {
-    bpm: 120, lang: 'Spanish',
-    notes: [[262,1],[330,1],[392,1],[392,1],[392,1],[440,1],[392,2],[330,1],[392,1],[440,1],[440,1],[440,1],[494,1],[440,2],[392,1],[440,1],[494,1],[494,1],[494,1],[523,1],[494,1],[440,1],[392,2],[392,2]]
-  },
-  // Chinese
-  'Jasmine Flower (Chinese)': {
-    bpm: 90, lang: 'Chinese',
-    notes: [[330,2],[330,1],[392,1],[440,2],[523,2],[523,1],[440,1],[392,2],[440,2],[392,1],[330,1],[294,2],[262,2],[294,1],[330,1],[392,1],[330,1],[294,2],[262,2]]
-  },
-  // Italian
-  'Santa Lucia (Italian)': {
-    bpm: 100, lang: 'Italian',
-    notes: [[330,2],[349,1],[330,1],[294,2],[330,2],[392,2],[440,1],[392,1],[349,2],[330,2],[330,2],[349,1],[330,1],[294,2],[330,2],[392,2],[440,1],[392,1],[349,1],[330,1],[294,2],[262,2]]
-  },
-  // Russian
-  'Katyusha (Russian)': {
-    bpm: 120, lang: 'Russian',
-    notes: [[330,1],[294,1],[330,1],[392,1],[349,1],[330,1],[294,2],[294,1],[262,1],[294,1],[330,1],[294,1],[262,1],[247,2],[330,1],[294,1],[330,1],[392,1],[349,1],[330,1],[294,2],[262,1],[294,1],[262,1],[247,1],[262,2],[262,2]]
-  },
-  // Korean
-  'Arirang (Korean)': {
-    bpm: 90, lang: 'Korean',
-    notes: [[330,2],[392,1],[440,1],[523,2],[440,2],[392,1],[440,1],[523,2],[440,2],[392,2],[330,2],[294,2],[262,2],[294,1],[330,1],[392,2],[330,2],[294,2],[262,2],[262,2]]
-  },
-  // English nursery
-  'London Bridge (English)': {
-    bpm: 130, lang: 'English',
-    notes: [[392,1.5],[440,0.5],[392,1],[349,1],[330,1],[349,1],[392,2],[294,1],[330,1],[349,2],[330,1],[349,1],[392,2],[392,1.5],[440,0.5],[392,1],[349,1],[330,1],[349,1],[392,2],[294,2],[392,2],[330,2],[262,2],[262,2]]
-  },
-  'Row Row Row Your Boat (English)': {
-    bpm: 110, lang: 'English',
-    notes: [[262,1.5],[262,0.5],[262,1],[294,0.5],[330,1.5],[330,1],[294,0.5],[330,1],[349,0.5],[392,2],[523,0.5],[523,0.5],[523,0.5],[392,0.5],[392,0.5],[392,0.5],[330,0.5],[330,0.5],[330,0.5],[262,0.5],[262,0.5],[262,0.5],[392,1],[349,0.5],[330,1],[294,0.5],[262,2]]
-  },
-  'Jingle Bells (English)': {
-    bpm: 140, lang: 'English',
-    notes: [[330,1],[330,1],[330,2],[330,1],[330,1],[330,2],[330,1],[392,1],[262,1],[294,1],[330,2],[330,2],[349,1],[349,1],[349,1],[349,1],[349,1],[330,1],[330,1],[330,0.5],[330,0.5],[330,1],[294,1],[294,1],[330,1],[294,2],[392,2]]
-  },
-  'Baa Baa Black Sheep (English)': {
-    bpm: 120, lang: 'English',
-    notes: [[262,1],[262,1],[392,1],[392,1],[440,0.5],[440,0.5],[440,0.5],[440,0.5],[392,2],[349,1],[349,1],[330,1],[330,1],[294,1],[294,1],[262,2]]
-  },
-  // Arabic
-  'Tala al-Badru Alayna (Arabic)': {
-    bpm: 90, lang: 'Arabic',
-    notes: [[294,2],[330,1],[349,1],[392,2],[392,2],[440,1],[392,1],[349,2],[330,2],[294,2],[330,1],[349,1],[392,2],[349,2],[330,1],[294,1],[262,2],[262,2]]
-  },
-  // Tamil
-  'Nila Nila Odi Va (Tamil)': {
-    bpm: 120, lang: 'Tamil',
-    notes: [[392,1],[392,1],[440,1],[392,1],[330,2],[330,2],[349,1],[349,1],[392,1],[349,1],[294,2],[294,2],[330,1],[349,1],[392,1],[440,1],[392,1],[349,1],[330,2],[330,2]]
-  },
-  // Portuguese
-  'Ciranda Cirandinha (Portuguese)': {
-    bpm: 130, lang: 'Portuguese',
-    notes: [[262,1],[330,1],[392,1],[392,1],[440,1],[392,1],[330,2],[262,1],[330,1],[392,1],[392,1],[349,1],[330,1],[294,2],[262,1],[294,1],[330,1],[349,1],[330,1],[294,1],[262,2],[262,2]]
-  },
-  // Swahili
-  'Malaika (Swahili)': {
-    bpm: 100, lang: 'Swahili',
-    notes: [[330,2],[392,1],[440,1],[523,2],[440,2],[392,1],[440,1],[392,2],[330,2],[294,1],[330,1],[392,2],[330,2],[294,2],[262,2],[262,2]]
-  }
-};
+// === MELODIES (Public Domain, multilingual) ===
+var MELODIES = [
+  {name:'Twinkle Twinkle', lang:'English', bpm:120, notes:[[262,1],[262,1],[392,1],[392,1],[440,1],[440,1],[392,2],[349,1],[349,1],[330,1],[330,1],[294,1],[294,1],[262,2],[392,1],[392,1],[349,1],[349,1],[330,1],[330,1],[294,2],[392,1],[392,1],[349,1],[349,1],[330,1],[330,1],[294,2],[262,1],[262,1],[392,1],[392,1],[440,1],[440,1],[392,2],[349,1],[349,1],[330,1],[330,1],[294,1],[294,1],[262,2]]},
+  {name:'Mary Had a Little Lamb', lang:'English', bpm:140, notes:[[330,1],[294,1],[262,1],[294,1],[330,1],[330,1],[330,2],[294,1],[294,1],[294,2],[330,1],[392,1],[392,2],[330,1],[294,1],[262,1],[294,1],[330,1],[330,1],[330,1],[330,1],[294,1],[294,1],[330,1],[294,1],[262,2]]},
+  {name:'Ode to Joy', lang:'German', bpm:120, notes:[[330,1],[330,1],[349,1],[392,1],[392,1],[349,1],[330,1],[294,1],[262,1],[262,1],[294,1],[330,1],[330,1.5],[294,0.5],[294,2],[330,1],[330,1],[349,1],[392,1],[392,1],[349,1],[330,1],[294,1],[262,1],[262,1],[294,1],[330,1],[294,1.5],[262,0.5],[262,2]]},
+  {name:'Happy Birthday', lang:'English', bpm:100, notes:[[262,0.75],[262,0.25],[294,1],[262,1],[349,1],[330,2],[262,0.75],[262,0.25],[294,1],[262,1],[392,1],[349,2],[262,0.75],[262,0.25],[523,1],[440,1],[349,1],[330,1],[294,2],[466,0.75],[466,0.25],[440,1],[349,1],[392,1],[349,2]]},
+  {name:'Frère Jacques', lang:'French', bpm:120, notes:[[262,1],[294,1],[330,1],[262,1],[262,1],[294,1],[330,1],[262,1],[330,1],[349,1],[392,2],[330,1],[349,1],[392,2],[392,0.75],[440,0.25],[392,0.5],[349,0.5],[330,1],[262,1],[392,0.75],[440,0.25],[392,0.5],[349,0.5],[330,1],[262,1],[262,1],[196,1],[262,2],[262,1],[196,1],[262,2]]},
+  {name:'Au Clair de la Lune', lang:'French', bpm:100, notes:[[262,1],[262,1],[262,1],[294,1],[330,2],[294,2],[262,1],[330,1],[294,1],[294,1],[262,2],[262,2],[262,1],[262,1],[262,1],[294,1],[330,2],[294,2],[262,1],[330,1],[294,1],[294,1],[262,2],[262,2]]},
+  {name:'Alle Meine Entchen', lang:'German', bpm:130, notes:[[262,1],[294,1],[330,1],[349,1],[392,2],[392,2],[440,1],[440,1],[440,1],[440,1],[392,2],[392,2],[440,1],[440,1],[440,1],[440,1],[392,2],[392,2],[349,1],[349,1],[349,1],[349,1],[330,2],[330,2],[294,1],[294,1],[294,1],[294,1],[262,2],[262,2]]},
+  {name:'Lakdi Ki Kathi', lang:'Hindi', bpm:130, notes:[[330,1],[330,1],[392,1],[392,1],[440,1],[392,1],[330,2],[294,1],[294,1],[330,1],[330,1],[262,2],[262,2],[330,1],[330,1],[392,1],[392,1],[440,1],[392,1],[330,2],[294,1],[330,1],[294,1],[262,1],[262,2],[262,2]]},
+  {name:'Machhli Jal Ki Rani', lang:'Hindi', bpm:120, notes:[[330,1],[330,1],[294,1],[330,1],[392,2],[392,2],[440,1],[392,1],[349,1],[330,1],[294,2],[294,2],[330,1],[330,1],[294,1],[330,1],[392,2],[392,2],[349,1],[330,1],[294,1],[262,1],[262,2],[262,2]]},
+  {name:'Sakura Sakura', lang:'Japanese', bpm:80, notes:[[330,2],[330,2],[349,2],[330,2],[330,2],[349,2],[330,1],[349,1],[392,2],[440,2],[392,1],[349,1],[330,1],[349,1],[294,2],[330,2],[330,2],[349,2],[330,2],[330,2],[349,2],[330,1],[349,1],[392,2],[440,2],[392,1],[349,1],[330,1],[294,1],[262,2]]},
+  {name:'Los Pollitos Dicen', lang:'Spanish', bpm:120, notes:[[330,1],[330,1],[330,1],[294,1],[262,2],[262,2],[294,1],[294,1],[294,1],[262,1],[247,2],[247,2],[262,1],[294,1],[330,1],[349,1],[330,1],[294,1],[262,2],[262,2]]},
+  {name:'De Colores', lang:'Spanish', bpm:120, notes:[[262,1],[330,1],[392,1],[392,1],[392,1],[440,1],[392,2],[330,1],[392,1],[440,1],[440,1],[440,1],[494,1],[440,2],[392,1],[440,1],[494,1],[494,1],[494,1],[523,1],[494,1],[440,1],[392,2],[392,2]]},
+  {name:'Jasmine Flower', lang:'Chinese', bpm:90, notes:[[330,2],[330,1],[392,1],[440,2],[523,2],[523,1],[440,1],[392,2],[440,2],[392,1],[330,1],[294,2],[262,2],[294,1],[330,1],[392,1],[330,1],[294,2],[262,2]]},
+  {name:'Santa Lucia', lang:'Italian', bpm:100, notes:[[330,2],[349,1],[330,1],[294,2],[330,2],[392,2],[440,1],[392,1],[349,2],[330,2],[330,2],[349,1],[330,1],[294,2],[330,2],[392,2],[440,1],[392,1],[349,1],[330,1],[294,2],[262,2]]},
+  {name:'Katyusha', lang:'Russian', bpm:120, notes:[[330,1],[294,1],[330,1],[392,1],[349,1],[330,1],[294,2],[294,1],[262,1],[294,1],[330,1],[294,1],[262,1],[247,2],[330,1],[294,1],[330,1],[392,1],[349,1],[330,1],[294,2],[262,1],[294,1],[262,1],[247,1],[262,2],[262,2]]},
+  {name:'Arirang', lang:'Korean', bpm:90, notes:[[330,2],[392,1],[440,1],[523,2],[440,2],[392,1],[440,1],[523,2],[440,2],[392,2],[330,2],[294,2],[262,2],[294,1],[330,1],[392,2],[330,2],[294,2],[262,2],[262,2]]},
+  {name:'London Bridge', lang:'English', bpm:130, notes:[[392,1.5],[440,0.5],[392,1],[349,1],[330,1],[349,1],[392,2],[294,1],[330,1],[349,2],[330,1],[349,1],[392,2],[392,1.5],[440,0.5],[392,1],[349,1],[330,1],[349,1],[392,2],[294,2],[392,2],[330,2],[262,2],[262,2]]},
+  {name:'Row Row Row Your Boat', lang:'English', bpm:110, notes:[[262,1.5],[262,0.5],[262,1],[294,0.5],[330,1.5],[330,1],[294,0.5],[330,1],[349,0.5],[392,2],[523,0.5],[523,0.5],[523,0.5],[392,0.5],[392,0.5],[392,0.5],[330,0.5],[330,0.5],[330,0.5],[262,0.5],[262,0.5],[262,0.5],[392,1],[349,0.5],[330,1],[294,0.5],[262,2]]},
+  {name:'Jingle Bells', lang:'English', bpm:140, notes:[[330,1],[330,1],[330,2],[330,1],[330,1],[330,2],[330,1],[392,1],[262,1],[294,1],[330,2],[330,2],[349,1],[349,1],[349,1],[349,1],[349,1],[330,1],[330,1],[330,0.5],[330,0.5],[330,1],[294,1],[294,1],[330,1],[294,2],[392,2]]},
+  {name:'Baa Baa Black Sheep', lang:'English', bpm:120, notes:[[262,1],[262,1],[392,1],[392,1],[440,0.5],[440,0.5],[440,0.5],[440,0.5],[392,2],[349,1],[349,1],[330,1],[330,1],[294,1],[294,1],[262,2]]},
+  {name:'Tala al-Badru Alayna', lang:'Arabic', bpm:90, notes:[[294,2],[330,1],[349,1],[392,2],[392,2],[440,1],[392,1],[349,2],[330,2],[294,2],[330,1],[349,1],[392,2],[349,2],[330,1],[294,1],[262,2],[262,2]]},
+  {name:'Nila Nila Odi Va', lang:'Tamil', bpm:120, notes:[[392,1],[392,1],[440,1],[392,1],[330,2],[330,2],[349,1],[349,1],[392,1],[349,1],[294,2],[294,2],[330,1],[349,1],[392,1],[440,1],[392,1],[349,1],[330,2],[330,2]]},
+  {name:'Ciranda Cirandinha', lang:'Portuguese', bpm:130, notes:[[262,1],[330,1],[392,1],[392,1],[440,1],[392,1],[330,2],[262,1],[330,1],[392,1],[392,1],[349,1],[330,1],[294,2],[262,1],[294,1],[330,1],[349,1],[330,1],[294,1],[262,2],[262,2]]},
+  {name:'Malaika', lang:'Swahili', bpm:100, notes:[[330,2],[392,1],[440,1],[523,2],[440,2],[392,1],[440,1],[392,2],[330,2],[294,1],[330,1],[392,2],[330,2],[294,2],[262,2],[262,2]]}
+];
 
-var PIECE_COUNTS = [6, 9, 12, 16, 24, 32];
+var DIFFICULTIES = {Easy:9, Medium:16, Hard:32};
+var GRID_LAYOUTS = {9:[3,3], 16:[4,4], 32:[8,4]};
+var EPOCH = new Date('2026-05-12');
 
-// Explicit grid layouts: cols × rows = exact piece count (no leftover slots)
-var GRID_LAYOUTS = {
-  6:  [3, 2],
-  9:  [3, 3],
-  12: [4, 3],
-  16: [4, 4],
-  24: [6, 4],
-  32: [8, 4]
-};
-
-// === JIGSAW SHAPE GENERATOR ===
-// Each piece edge: 0=flat, 1=tab(out), -1=blank(in)
-// Adjacent pieces have complementary edges (tab meets blank)
-function generateEdgeMap(cols, rows, count){
-  // For each internal edge, assign direction (1 or -1)
-  // edgeMap[pieceIdx] = {top, right, bottom, left}
-  var edges = [];
-  for(var r=0; r<rows; r++){
-    for(var c=0; c<cols; c++){
-      var idx = r * cols + c;
-      if(idx >= count) break;
-      var top = 0, right = 0, bottom = 0, left = 0;
-      // Top edge: flat if first row, else opposite of piece above's bottom
-      if(r === 0) top = 0;
-      else top = -(edges[(r-1)*cols + c].bottom);
-      // Left edge: flat if first col, else opposite of piece to left's right
-      if(c === 0) left = 0;
-      else left = -(edges[r*cols + c - 1].right);
-      // Right edge: flat if last col, else random
-      if(c === cols-1) right = 0;
-      else right = Math.random() > 0.5 ? 1 : -1;
-      // Bottom edge: flat if last row or beyond count, else random
-      if(r === rows-1 || (r+1)*cols + c >= count) bottom = 0;
-      else bottom = Math.random() > 0.5 ? 1 : -1;
-      edges.push({top:top, right:right, bottom:bottom, left:left});
-    }
-  }
-  return edges;
+// === DAILY PUZZLE ===
+function getDayNum(){
+  var today = new Date(); today.setHours(0,0,0,0);
+  return Math.floor((today - EPOCH) / 86400000) + 1;
 }
-
-// Generate SVG path for a jigsaw piece
-// size = base size of piece square, tab protrudes ~20% beyond
-function jigsawPath(size, edges, forClip){
-  var s = size;
-  var tab = s * 0.2; // tab protrusion size
-  var neck = s * 0.1; // neck width
-  var w = s * 0.3; // tab width at base
-
-  // We draw path starting from top-left, going clockwise
-  // Coordinate system: (0,0) is top-left of piece bounding box
-  // The actual piece square occupies (tab, tab) to (tab+s, tab+s) to leave room for tabs
-  var ox = tab, oy = tab; // offset
-  var d = '';
-
-  // Top edge (left to right)
-  d += 'M '+ox+' '+oy+' ';
-  if(edges.top === 0){
-    d += 'L '+(ox+s)+' '+oy+' ';
-  } else {
-    var dir = edges.top; // 1=tab out (up), -1=blank in (down)
-    d += 'L '+(ox+s*0.35)+' '+oy+' ';
-    d += 'C '+(ox+s*0.35)+' '+(oy - dir*tab*0.1)+' '+(ox+s*0.4)+' '+(oy - dir*tab*0.8)+' '+(ox+s*0.5)+' '+(oy - dir*tab)+' ';
-    d += 'C '+(ox+s*0.6)+' '+(oy - dir*tab*0.8)+' '+(ox+s*0.65)+' '+(oy - dir*tab*0.1)+' '+(ox+s*0.65)+' '+oy+' ';
-    d += 'L '+(ox+s)+' '+oy+' ';
-  }
-
-  // Right edge (top to bottom)
-  if(edges.right === 0){
-    d += 'L '+(ox+s)+' '+(oy+s)+' ';
-  } else {
-    var dir = edges.right; // 1=tab out (right), -1=blank in (left)
-    d += 'L '+(ox+s)+' '+(oy+s*0.35)+' ';
-    d += 'C '+(ox+s + dir*tab*0.1)+' '+(oy+s*0.35)+' '+(ox+s + dir*tab*0.8)+' '+(oy+s*0.4)+' '+(ox+s + dir*tab)+' '+(oy+s*0.5)+' ';
-    d += 'C '+(ox+s + dir*tab*0.8)+' '+(oy+s*0.6)+' '+(ox+s + dir*tab*0.1)+' '+(oy+s*0.65)+' '+(ox+s)+' '+(oy+s*0.65)+' ';
-    d += 'L '+(ox+s)+' '+(oy+s)+' ';
-  }
-
-  // Bottom edge (right to left)
-  if(edges.bottom === 0){
-    d += 'L '+ox+' '+(oy+s)+' ';
-  } else {
-    var dir = edges.bottom; // 1=tab out (down), -1=blank in (up)
-    d += 'L '+(ox+s*0.65)+' '+(oy+s)+' ';
-    d += 'C '+(ox+s*0.65)+' '+(oy+s + dir*tab*0.1)+' '+(ox+s*0.6)+' '+(oy+s + dir*tab*0.8)+' '+(ox+s*0.5)+' '+(oy+s + dir*tab)+' ';
-    d += 'C '+(ox+s*0.4)+' '+(oy+s + dir*tab*0.8)+' '+(ox+s*0.35)+' '+(oy+s + dir*tab*0.1)+' '+(ox+s*0.35)+' '+(oy+s)+' ';
-    d += 'L '+ox+' '+(oy+s)+' ';
-  }
-
-  // Left edge (bottom to top)
-  if(edges.left === 0){
-    d += 'L '+ox+' '+oy+' ';
-  } else {
-    var dir = edges.left; // 1=tab out (left), -1=blank in (right)
-    d += 'L '+ox+' '+(oy+s*0.65)+' ';
-    d += 'C '+(ox - dir*tab*0.1)+' '+(oy+s*0.65)+' '+(ox - dir*tab*0.8)+' '+(oy+s*0.6)+' '+(ox - dir*tab)+' '+(oy+s*0.5)+' ';
-    d += 'C '+(ox - dir*tab*0.8)+' '+(oy+s*0.4)+' '+(ox - dir*tab*0.1)+' '+(oy+s*0.35)+' '+ox+' '+(oy+s*0.35)+' ';
-    d += 'L '+ox+' '+oy+' ';
-  }
-
-  d += 'Z';
-  return d;
-}
-
-// Create an SVG element for a jigsaw piece
-function createPieceSVG(size, edges, fillColor, strokeColor){
-  var totalSize = size + size * 0.4; // room for tabs
-  var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('width', totalSize);
-  svg.setAttribute('height', totalSize);
-  svg.setAttribute('viewBox', '0 0 '+totalSize+' '+totalSize);
-  svg.style.display = 'block';
-  var path = document.createElementNS('http://www.w3.org/2000/svg','path');
-  path.setAttribute('d', jigsawPath(size, edges));
-  path.setAttribute('fill', fillColor);
-  path.setAttribute('stroke', strokeColor);
-  path.setAttribute('stroke-width', '1.5');
-  svg.appendChild(path);
-  return svg;
+function getDailyMelody(){
+  var dayNum = getDayNum();
+  var idx = ((dayNum - 1) % MELODIES.length + MELODIES.length) % MELODIES.length;
+  return MELODIES[idx];
 }
 
 // === AUDIO ENGINE ===
@@ -305,7 +113,6 @@ function ensureAudio(){
   if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
   if(actx.state==='suspended') actx.resume();
 }
-
 function playNotes(notes, bpm, onNote, onDone){
   ensureAudio();
   var beatDur = 60 / bpm;
@@ -315,31 +122,24 @@ function playNotes(notes, bpm, onNote, onDone){
     var freq = notes[i][0], dur = notes[i][1] * beatDur;
     var osc = actx.createOscillator();
     var gain = actx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = freq;
-    osc.connect(gain);
-    gain.connect(actx.destination);
+    osc.type = 'sine'; osc.frequency.value = freq;
+    osc.connect(gain); gain.connect(actx.destination);
     gain.gain.setValueAtTime(0, t);
     gain.gain.linearRampToValueAtTime(0.3, t + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.01, t + dur * 0.95);
     gain.gain.linearRampToValueAtTime(0, t + dur);
-    osc.start(t);
-    osc.stop(t + dur);
-    if(onNote){
-      (function(idx, time){
-        setTimeout(function(){ onNote(idx); }, (time - actx.currentTime) * 1000);
-      })(i, t);
-    }
-    t += dur;
-    totalDur = t - actx.currentTime;
+    osc.start(t); osc.stop(t + dur);
+    if(onNote)(function(idx,time){setTimeout(function(){onNote(idx)},(time-actx.currentTime)*1000)})(i,t);
+    t += dur; totalDur = t - actx.currentTime;
   }
   if(onDone) setTimeout(onDone, totalDur * 1000 + 100);
 }
 
 // === GAME STATE ===
 var state = {
-  melodyName: '',
-  pieceCount: 6,
+  melody: null,
+  difficulty: 'Easy',
+  pieceCount: 9,
   pieces: [],
   frame: [],
   pool: [],
@@ -347,456 +147,347 @@ var state = {
   solved: false,
   moves: 0,
   startTime: 0,
+  elapsed: 0,
   timerStarted: false,
+  timerInterval: null,
   isPlaying: false,
-  edgeMap: [],
+  showBoardHints: false,
   cols: 3,
-  rows: 2,
-  showShapes: false
+  rows: 3,
+  edgeMap: []
 };
 
-// === SPLIT MELODY INTO PIECES ===
-function splitMelody(notes, count){
-  var pieces = [];
-  var totalBeats = 0;
-  for(var i=0; i<notes.length; i++) totalBeats += notes[i][1];
-  var beatsPerPiece = totalBeats / count;
-  var currentPiece = [];
-  var currentBeats = 0;
-  var pieceIdx = 0;
-  for(var i=0; i<notes.length; i++){
-    currentPiece.push(notes[i]);
-    currentBeats += notes[i][1];
-    if(currentBeats >= beatsPerPiece * (pieceIdx + 1) - 0.01 || i === notes.length - 1){
-      pieces.push({id: pieceIdx, notes: currentPiece.slice(), correctIndex: pieceIdx});
-      currentPiece = [];
-      pieceIdx++;
-      if(pieceIdx >= count - 1 && i < notes.length - 1){
-        pieces.push({id: pieceIdx, notes: notes.slice(i+1), correctIndex: pieceIdx});
-        break;
-      }
+// === JIGSAW SHAPE GENERATOR ===
+function generateEdgeMap(cols, rows, count){
+  var edges = [];
+  for(var r=0; r<rows; r++){
+    for(var c=0; c<cols; c++){
+      var idx = r * cols + c;
+      if(idx >= count) break;
+      var top=0, right=0, bottom=0, left=0;
+      if(r>0) top = -(edges[(r-1)*cols+c].bottom);
+      if(c>0) left = -(edges[r*cols+c-1].right);
+      if(c<cols-1) right = Math.random()>0.5?1:-1;
+      if(r<rows-1 && (r+1)*cols+c<count) bottom = Math.random()>0.5?1:-1;
+      edges.push({top:top,right:right,bottom:bottom,left:left});
     }
   }
-  while(pieces.length < count) pieces.push({id: pieces.length, notes: [[262, 0.5]], correctIndex: pieces.length});
-  return pieces.slice(0, count);
+  return edges;
+}
+
+function jigsawPath(size, edges){
+  var s=size, tab=s*0.2, ox=tab, oy=tab;
+  var d='M '+ox+' '+oy+' ';
+  // Top
+  if(edges.top===0) d+='L '+(ox+s)+' '+oy+' ';
+  else{var dir=edges.top;d+='L '+(ox+s*0.35)+' '+oy+' C '+(ox+s*0.35)+' '+(oy-dir*tab*0.1)+' '+(ox+s*0.4)+' '+(oy-dir*tab*0.8)+' '+(ox+s*0.5)+' '+(oy-dir*tab)+' C '+(ox+s*0.6)+' '+(oy-dir*tab*0.8)+' '+(ox+s*0.65)+' '+(oy-dir*tab*0.1)+' '+(ox+s*0.65)+' '+oy+' L '+(ox+s)+' '+oy+' ';}
+  // Right
+  if(edges.right===0) d+='L '+(ox+s)+' '+(oy+s)+' ';
+  else{var dir=edges.right;d+='L '+(ox+s)+' '+(oy+s*0.35)+' C '+(ox+s+dir*tab*0.1)+' '+(oy+s*0.35)+' '+(ox+s+dir*tab*0.8)+' '+(oy+s*0.4)+' '+(ox+s+dir*tab)+' '+(oy+s*0.5)+' C '+(ox+s+dir*tab*0.8)+' '+(oy+s*0.6)+' '+(ox+s+dir*tab*0.1)+' '+(oy+s*0.65)+' '+(ox+s)+' '+(oy+s*0.65)+' L '+(ox+s)+' '+(oy+s)+' ';}
+  // Bottom
+  if(edges.bottom===0) d+='L '+ox+' '+(oy+s)+' ';
+  else{var dir=edges.bottom;d+='L '+(ox+s*0.65)+' '+(oy+s)+' C '+(ox+s*0.65)+' '+(oy+s+dir*tab*0.1)+' '+(ox+s*0.6)+' '+(oy+s+dir*tab*0.8)+' '+(ox+s*0.5)+' '+(oy+s+dir*tab)+' C '+(ox+s*0.4)+' '+(oy+s+dir*tab*0.8)+' '+(ox+s*0.35)+' '+(oy+s+dir*tab*0.1)+' '+(ox+s*0.35)+' '+(oy+s)+' L '+ox+' '+(oy+s)+' ';}
+  // Left
+  if(edges.left===0) d+='L '+ox+' '+oy+' ';
+  else{var dir=edges.left;d+='L '+ox+' '+(oy+s*0.65)+' C '+(ox-dir*tab*0.1)+' '+(oy+s*0.65)+' '+(ox-dir*tab*0.8)+' '+(oy+s*0.6)+' '+(ox-dir*tab)+' '+(oy+s*0.5)+' C '+(ox-dir*tab*0.8)+' '+(oy+s*0.4)+' '+(ox-dir*tab*0.1)+' '+(oy+s*0.35)+' '+ox+' '+(oy+s*0.35)+' L '+ox+' '+oy+' ';}
+  return d+'Z';
+}
+
+function createPieceSVG(size, edges, fill, stroke){
+  var total=size+size*0.4;
+  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width',total);svg.setAttribute('height',total);
+  svg.setAttribute('viewBox','0 0 '+total+' '+total);svg.style.display='block';
+  var path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d',jigsawPath(size,edges));
+  path.setAttribute('fill',fill);path.setAttribute('stroke',stroke);path.setAttribute('stroke-width','1.5');
+  svg.appendChild(path);return svg;
+}
+
+// === MELODY SPLIT ===
+function splitMelody(notes, count){
+  var pieces=[],totalBeats=0;
+  for(var i=0;i<notes.length;i++) totalBeats+=notes[i][1];
+  var bpp=totalBeats/count, cur=[], cb=0, pi=0;
+  for(var i=0;i<notes.length;i++){
+    cur.push(notes[i]); cb+=notes[i][1];
+    if(cb>=bpp*(pi+1)-0.01||i===notes.length-1){
+      pieces.push({id:pi,notes:cur.slice(),correctIndex:pi}); cur=[]; pi++;
+      if(pi>=count-1&&i<notes.length-1){pieces.push({id:pi,notes:notes.slice(i+1),correctIndex:pi});break;}
+    }
+  }
+  while(pieces.length<count) pieces.push({id:pieces.length,notes:[[262,0.5]],correctIndex:pieces.length});
+  return pieces.slice(0,count);
 }
 
 function shuffle(arr){
-  arr = arr.slice();
-  for(var i=arr.length-1; i>0; i--){
-    var j = Math.floor(Math.random()*(i+1));
-    var t=arr[i]; arr[i]=arr[j]; arr[j]=t;
-  }
+  arr=arr.slice();
+  for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}
   return arr;
 }
 
+// === TIMER ===
+function startTimer(){
+  if(state.timerStarted) return;
+  state.timerStarted=true; state.startTime=Date.now();
+  state.timerInterval=setInterval(function(){
+    state.elapsed=Math.floor((Date.now()-state.startTime)/1000);
+    var el=document.getElementById('timer-display');
+    if(el) el.textContent=formatTime(state.elapsed);
+  },500);
+}
+function stopTimer(){if(state.timerInterval){clearInterval(state.timerInterval);state.timerInterval=null;}}
+function formatTime(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+
 // === RENDER ===
-function ce(tag, cls){var e=document.createElement(tag);if(cls)e.className=cls;return e;}
+function ce(tag,cls){var e=document.createElement(tag);if(cls)e.className=cls;return e;}
 
 function render(){
-  var app = document.getElementById('app');
-  app.innerHTML = '';
+  var app=document.getElementById('app');
+  app.innerHTML='';
+  var melody=state.melody;
+  var dayNum=getDayNum();
 
   // Top bar
-  var tb = ce('div','top-bar');
-  var daily = getDailyMelody();
-  var melLang = MELODIES[state.melodyName] ? MELODIES[state.melodyName].lang : '';
-  tb.innerHTML = '<h1>\uD83E\uDDE9 Ausaw <span style="font-size:12px;color:#888">(Audio Jigsaw)</span></h1><div class="tagline">Day #'+daily.dayNum+' \u00B7 '+melLang+' \u00B7 Listen \u00B7 Arrange \u00B7 Complete</div>';
+  var tb=ce('div','top-bar');
+  tb.innerHTML='<h1>\uD83E\uDDE9 Ausaw</h1><div class="subtitle">Audio Jigsaw by Auzle</div><div class="day-info">Day #'+dayNum+' \u00B7 '+melody.lang+'</div>';
   app.appendChild(tb);
 
-  // Controls
-  var ctrl = ce('div','controls');
-  var melSel = ce('select');
-  Object.keys(MELODIES).forEach(function(name){
-    var opt = ce('option'); opt.value = name; opt.textContent = name;
-    if(name === state.melodyName) opt.selected = true;
-    melSel.appendChild(opt);
+  // Difficulty tabs
+  var tabs=ce('div','diff-tabs');
+  ['Easy','Medium','Hard'].forEach(function(d){
+    var tab=ce('div','diff-tab'+(state.difficulty===d?' active':''));
+    tab.textContent=d+' ('+DIFFICULTIES[d]+'pc)';
+    tab.onclick=function(){switchDifficulty(d);};
+    tabs.appendChild(tab);
   });
-  melSel.onchange = function(){ startGame(melSel.value, state.pieceCount); };
+  app.appendChild(tabs);
 
-  var pcSel = ce('select');
-  PIECE_COUNTS.forEach(function(n){
-    var opt = ce('option'); opt.value = n; opt.textContent = n + ' pieces';
-    if(n === state.pieceCount) opt.selected = true;
-    pcSel.appendChild(opt);
-  });
-  pcSel.onchange = function(){ startGame(state.melodyName, parseInt(pcSel.value)); };
+  // Timer
+  var timer=ce('div','timer');
+  timer.innerHTML='<span id="timer-display">'+formatTime(state.elapsed)+'</span>';
+  app.appendChild(timer);
 
-  var newBtn = ce('button'); newBtn.textContent = '\u{1F504} New Game';
-  newBtn.onclick = function(){ startGame(state.melodyName, state.pieceCount); };
-
-  var playMelBtn = ce('button'); playMelBtn.textContent = '\u25B6 Play Melody';
-  playMelBtn.onclick = function(){
+  // Melody info + play button
+  var mi=ce('div','melody-info');
+  mi.innerHTML='<div class="name">\uD83C\uDFB5 '+melody.name+'</div><div class="lang">'+melody.lang+' \u00B7 Listen to the full melody first!</div>';
+  var playBtn=ce('button','play-melody-btn');
+  playBtn.innerHTML='\u25B6 Play Full Melody';
+  playBtn.onclick=function(){
     if(state.isPlaying) return;
-    state.isPlaying = true;
-    playMelBtn.textContent = '\u23F9 Playing...';
-    playMelBtn.style.background = '#e74c3c';
-    var melody = MELODIES[state.melodyName];
+    state.isPlaying=true; startTimer();
+    playBtn.classList.add('playing'); playBtn.innerHTML='\u23F9 Playing...';
     playNotes(melody.notes, melody.bpm, null, function(){
-      state.isPlaying = false;
-      playMelBtn.textContent = '\u25B6 Play Melody';
-      playMelBtn.style.background = '';
+      state.isPlaying=false;
+      playBtn.classList.remove('playing'); playBtn.innerHTML='\u25B6 Play Full Melody';
     });
   };
+  mi.appendChild(playBtn);
+  app.appendChild(mi);
 
-  ctrl.appendChild(melSel); ctrl.appendChild(pcSel); ctrl.appendChild(newBtn); ctrl.appendChild(playMelBtn);
-  app.appendChild(ctrl);
+  // Frame
+  var cols=state.cols, rows=state.rows;
+  var maxW=Math.min(460,window.innerWidth-48);
+  var pieceSize=Math.floor((maxW-16-cols*3)/cols);
+  pieceSize=Math.max(28,Math.min(pieceSize,56));
 
-  // Shape hints toggle
-  var toggleRow = ce('div','controls');
-  var shapeBtn = ce('button');
-  shapeBtn.textContent = state.showShapes ? '\uD83E\uDDE9 Board Hints: ON' : '\u25A2 Board Hints: OFF';
-  shapeBtn.style.background = state.showShapes ? '#2ecc71' : '#555';
-  shapeBtn.onclick = function(){ state.showShapes = !state.showShapes; render(); };
-  toggleRow.appendChild(shapeBtn);
-  app.appendChild(toggleRow);
+  var fw=ce('div','frame-wrap');
+  var fl=ce('div','section-label');fl.textContent='Jigsaw Board';
+  fw.appendChild(fl);
 
-  var cols = state.cols, rows = state.rows;
-  // Calculate piece display size based on available width
-  var maxFrameW = Math.min(480, window.innerWidth - 60);
-  var pieceSize = Math.floor((maxFrameW - 24) / cols) - 2;
-  pieceSize = Math.max(36, Math.min(pieceSize, 64));
+  var frame=ce('div','jigsaw-frame');
+  frame.style.gridTemplateColumns='repeat('+cols+', '+pieceSize+'px)';
 
-  // Jigsaw Frame
-  var fl = ce('div','frame-label'); fl.textContent = 'Jigsaw Frame \u2014 ' + state.melodyName;
-  app.appendChild(fl);
+  for(var i=0;i<state.pieceCount;i++){
+    (function(si){
+      var slot=ce('div','frame-slot');
+      slot.style.width=pieceSize+'px';slot.style.height=pieceSize+'px';
 
-  var frame = ce('div','jigsaw-frame');
-  var cellSize = state.showShapes ? (pieceSize + pieceSize*0.4) : (pieceSize + 4);
-  frame.style.gridTemplateColumns = 'repeat('+cols+', '+cellSize+'px)';
-  frame.style.gridTemplateRows = 'repeat('+rows+', '+cellSize+'px)';
-  frame.style.width = 'fit-content';
-  if(!state.showShapes) frame.style.gap = '0px';
-
-  for(var i=0; i<state.pieceCount; i++){
-    (function(slotIdx){
-      var slot = ce('div','frame-slot');
-      var edges = state.edgeMap[slotIdx] || {top:0,right:0,bottom:0,left:0};
-      var useShapes = state.showShapes;
-
-      if(useShapes){
-        slot.style.width = (pieceSize + pieceSize*0.4) + 'px';
-        slot.style.height = (pieceSize + pieceSize*0.4) + 'px';
-      } else {
-        slot.style.width = pieceSize + 'px';
-        slot.style.height = pieceSize + 'px';
-        slot.style.borderRadius = '4px';
-        slot.style.border = '2px dashed #333';
-        slot.style.margin = '2px';
-      }
-
-      if(state.frame[slotIdx] !== null){
+      if(state.frame[si]!==null){
         slot.classList.add('filled');
-        if(useShapes){
-          var svg = createPieceSVG(pieceSize, edges, '#4361ee', '#5a7afe');
-          svg.classList.add('slot-bg');
-          svg.style.position = 'absolute';
-          svg.style.inset = '0';
-          slot.appendChild(svg);
-        } else {
-          slot.style.background = '#4361ee';
-          slot.style.border = '2px solid #5a7afe';
-        }
-        var lbl = ce('span','slot-label'); lbl.textContent = '\uD83C\uDFB5';
-        slot.appendChild(lbl);
-        slot.onclick = function(){
-          if(state.solved || state.isPlaying) return;
-          // Undo: return piece to pool
-          var pieceId = state.frame[slotIdx];
-          state.frame[slotIdx] = null;
-          state.pool.push(pieceId);
-          state.moves++;
-          toast('\u21A9 Piece returned to pool');
-          render();
+        slot.textContent='\uD83C\uDFB5';
+        slot.style.fontSize=(pieceSize*0.35)+'px';
+        // Undo on click
+        slot.onclick=function(){
+          if(state.solved||state.isPlaying) return;
+          var pid=state.frame[si]; state.frame[si]=null;
+          state.pool.push(pid); state.moves++;
+          toast('\u21A9 Piece returned'); render();
         };
       } else {
-        if(useShapes){
-          var svg = createPieceSVG(pieceSize, edges, 'rgba(15,52,96,0.6)', '#333');
-          svg.classList.add('slot-bg');
-          svg.style.position = 'absolute';
-          svg.style.inset = '0';
+        if(state.showBoardHints && state.edgeMap[si]){
+          // Show jigsaw outline as hint
+          var svg=createPieceSVG(pieceSize*0.7,state.edgeMap[si],'rgba(67,97,238,0.08)','#ccc');
+          svg.style.position='absolute';svg.style.top='2px';svg.style.left='2px';
           slot.appendChild(svg);
-        } else {
-          slot.style.background = 'rgba(15,52,96,0.6)';
         }
-        var lbl = ce('span','slot-label'); lbl.textContent = (slotIdx + 1);
-        slot.appendChild(lbl);
-
-        // Highlight if a piece is selected (awaiting placement)
-        if(state.selectedPiece !== null){
-          slot.classList.add('awaiting');
-        }
-
-        slot.onclick = function(){
-          if(state.solved || state.isPlaying) return;
-          if(state.selectedPiece !== null){
-            placePiece(slotIdx);
-          }
+        slot.textContent=state.showBoardHints?'':'';
+        if(state.selectedPiece!==null) slot.classList.add('awaiting');
+        slot.onclick=function(){
+          if(state.solved||state.isPlaying) return;
+          if(state.selectedPiece!==null) placePiece(si);
         };
-
-        // Drop target for drag
-        slot.ondragover = function(e){ e.preventDefault(); slot.classList.add('drop-target'); };
-        slot.ondragleave = function(){ slot.classList.remove('drop-target'); };
-        slot.ondrop = function(e){
-          e.preventDefault();
-          slot.classList.remove('drop-target');
-          var pieceId = parseInt(e.dataTransfer.getData('text/plain'));
-          if(!isNaN(pieceId)){
-            state.selectedPiece = pieceId;
-            placePiece(slotIdx);
-          }
-        };
+        // Drag support
+        slot.ondragover=function(e){e.preventDefault();slot.classList.add('awaiting');};
+        slot.ondragleave=function(){if(state.selectedPiece===null)slot.classList.remove('awaiting');};
+        slot.ondrop=function(e){e.preventDefault();var pid=parseInt(e.dataTransfer.getData('text/plain'));if(!isNaN(pid)){state.selectedPiece=pid;placePiece(si);}};
       }
-      slot.dataset.slot = slotIdx;
+      slot.dataset.slot=si;
       frame.appendChild(slot);
     })(i);
   }
-  app.appendChild(frame);
+  fw.appendChild(frame);
+
+  // Board hints toggle
+  var hintBtn=ce('button','board-hint-btn');
+  hintBtn.textContent=state.showBoardHints?'\uD83E\uDDE9 Board Hints: ON':'\u25A2 Board Hints: OFF';
+  hintBtn.onclick=function(){state.showBoardHints=!state.showBoardHints;render();};
+  fw.appendChild(hintBtn);
+  app.appendChild(fw);
 
   // Piece Pool
-  if(state.pool.length > 0 && !state.solved){
-    var pl = ce('div','pool-label');
-    if(state.selectedPiece !== null){
-      pl.textContent = '\u261D Piece selected! Tap an empty slot above to place it.';
-      pl.style.color = '#ffd700';
-    } else {
-      pl.textContent = 'Pieces (' + state.pool.length + ' remaining) \u2014 tap to listen & select';
-    }
+  if(state.pool.length>0&&!state.solved){
+    var pl=ce('div','pool-label'+(state.selectedPiece!==null?' active':''));
+    pl.textContent=state.selectedPiece!==null?'\u261D Tap a slot above to place':'Tap a piece to hear & select';
     app.appendChild(pl);
 
-    var pool = ce('div','piece-pool');
-
-    state.pool.forEach(function(pieceId){
-      var piece = ce('div','piece');
-      var edges = state.edgeMap[pieceId] || {top:0,right:0,bottom:0,left:0};
-
-      if(state.selectedPiece === pieceId) piece.classList.add('selected');
-
-      // Pool tiles always show jigsaw shapes (like real puzzle pieces)
-      var svg = createPieceSVG(40, edges, state.selectedPiece===pieceId ? '#ffd700' : '#4361ee', state.selectedPiece===pieceId ? '#ffed4a' : '#5a7afe');
-      piece.appendChild(svg);
-      var lbl = ce('div','piece-label'); lbl.textContent = '\uD83C\uDFB5';
-      piece.appendChild(lbl);
-
-      // Draggable
-      piece.draggable = true;
-      piece.ondragstart = function(e){
-        e.dataTransfer.setData('text/plain', pieceId.toString());
-        piece.classList.add('dragging');
-        state.selectedPiece = pieceId;
-        // Highlight all empty slots
-        setTimeout(function(){
-          document.querySelectorAll('.frame-slot:not(.filled)').forEach(function(s){ s.classList.add('awaiting'); });
-        }, 50);
-      };
-      piece.ondragend = function(){
-        piece.classList.remove('dragging');
-        document.querySelectorAll('.frame-slot').forEach(function(s){ s.classList.remove('awaiting','drop-target'); });
-      };
-
-      // Click to select/deselect + play audio
-      piece.onclick = function(e){
+    var pool=ce('div','piece-pool');
+    state.pool.forEach(function(pid){
+      var pc=ce('div','piece');
+      if(state.selectedPiece===pid) pc.classList.add('selected');
+      pc.textContent='\uD83C\uDFB5';
+      pc.draggable=true;
+      pc.ondragstart=function(e){e.dataTransfer.setData('text/plain',pid.toString());state.selectedPiece=pid;};
+      pc.onclick=function(e){
         e.stopPropagation();
         if(state.isPlaying) return;
-        if(state.selectedPiece === pieceId){
-          // Deselect
-          state.selectedPiece = null;
-          render();
-        } else {
-          state.selectedPiece = pieceId;
-          render();
-          playPieceAudio(pieceId);
-        }
+        if(state.selectedPiece===pid){state.selectedPiece=null;render();}
+        else{state.selectedPiece=pid;render();playPieceAudio(pid);}
       };
-
-      // Touch drag support for mobile
-      var touchData = null;
-      piece.ontouchstart = function(e){
-        touchData = {id: pieceId, startX: e.touches[0].clientX, startY: e.touches[0].clientY, moved: false};
-        state.selectedPiece = pieceId;
-      };
-      piece.ontouchmove = function(e){
-        if(!touchData) return;
-        var dx = e.touches[0].clientX - touchData.startX;
-        var dy = e.touches[0].clientY - touchData.startY;
-        if(Math.abs(dx) > 10 || Math.abs(dy) > 10) touchData.moved = true;
-      };
-      piece.ontouchend = function(e){
-        if(!touchData) return;
-        if(!touchData.moved){
-          // Just a tap - select and play
-          if(state.isPlaying){ touchData = null; return; }
-          render();
-          playPieceAudio(pieceId);
-        } else {
-          // Was a drag - find slot under finger
-          var touch = e.changedTouches[0];
-          var el = document.elementFromPoint(touch.clientX, touch.clientY);
-          if(el){
-            var slot = el.closest('.frame-slot');
-            if(slot && !slot.classList.contains('filled')){
-              var slotIdx = parseInt(slot.dataset.slot);
-              placePiece(slotIdx);
-            }
-          }
-        }
-        touchData = null;
-      };
-
-      pool.appendChild(piece);
+      pool.appendChild(pc);
     });
     app.appendChild(pool);
   }
 
   // Result
   if(state.solved){
-    var rd = ce('div','result win');
-    var elapsed = Math.floor((Date.now() - state.startTime)/1000);
-    rd.innerHTML = '\u2705 Melody Complete!<div class="stats"><span>\u23F1 '+Math.floor(elapsed/60)+':'+String(elapsed%60).padStart(2,'0')+'</span><span>\uD83D\uDD00 '+state.moves+' moves</span></div>';
+    var rd=ce('div','result win');
+    rd.innerHTML='\u2705 Melody Complete!';
     app.appendChild(rd);
+    var stats=ce('div','stats');
+    stats.innerHTML='<span>\u23F1 '+formatTime(state.elapsed)+'</span><span>\uD83D\uDD00 '+state.moves+' moves</span>';
+    app.appendChild(stats);
 
-    var playBtn = ce('button','play-full-btn');
-    playBtn.textContent = '\u25B6 Play Full Melody';
-    playBtn.onclick = function(){ playFullMelody(); };
-    app.appendChild(playBtn);
+    // Share button
+    var shareBtn=ce('button','share-btn');
+    shareBtn.textContent='\uD83D\uDCE4 Share Result';
+    shareBtn.onclick=function(){shareResult();};
+    app.appendChild(shareBtn);
+
+    // Play again
+    var playFullBtn=ce('button','play-melody-btn');
+    playFullBtn.textContent='\u25B6 Play Completed Melody';
+    playFullBtn.style.marginTop='12px';
+    playFullBtn.onclick=function(){playFullMelody();};
+    app.appendChild(playFullBtn);
   }
 
   // Instructions
-  var ins = ce('div','instructions');
-  ins.textContent = 'Tap a piece to hear it, then tap a slot to place. Or drag pieces into the frame. Pieces only fit in their correct position!';
+  var ins=ce('div','instructions');
+  ins.textContent='Listen to the melody, then arrange pieces in order. Tap piece \u2192 tap slot. Tap filled slot to undo.';
   app.appendChild(ins);
 
-  // Toast
-  if(!document.getElementById('toast-el')){
-    var toastEl = ce('div','toast');
-    toastEl.id = 'toast-el';
-    document.body.appendChild(toastEl);
-  }
+  if(!document.getElementById('toast-el')){var t=ce('div','toast');t.id='toast-el';document.body.appendChild(t);}
 }
 
-function toast(msg){
-  var el = document.getElementById('toast-el');
-  if(!el) return;
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(function(){ el.classList.remove('show'); }, 2000);
-}
+function toast(msg){var el=document.getElementById('toast-el');if(!el)return;el.textContent=msg;el.classList.add('show');setTimeout(function(){el.classList.remove('show');},2000);}
 
-function playPieceAudio(pieceId){
+function playPieceAudio(pid){
   if(state.isPlaying) return;
-  var piece = state.pieces[pieceId];
-  if(!piece || piece.notes.length === 0) return;
-  state.isPlaying = true;
-  if(!state.timerStarted){
-    state.timerStarted = true;
-    state.startTime = Date.now();
-  }
-  playNotes(piece.notes, MELODIES[state.melodyName].bpm, null, function(){
-    state.isPlaying = false;
-  });
+  var piece=state.pieces[pid];
+  if(!piece||!piece.notes.length) return;
+  state.isPlaying=true; startTimer();
+  playNotes(piece.notes, state.melody.bpm, null, function(){state.isPlaying=false;});
 }
 
-function placePiece(slotIdx){
-  if(state.selectedPiece === null) return;
-  if(state.frame[slotIdx] !== null){
-    toast('Slot already filled!');
-    return;
-  }
-  state.moves++;
-  var pieceId = state.selectedPiece;
-  var piece = state.pieces[pieceId];
-
-  if(piece.correctIndex === slotIdx){
-    state.frame[slotIdx] = pieceId;
-    state.pool = state.pool.filter(function(id){ return id !== pieceId; });
-    state.selectedPiece = null;
-    if(state.pool.length === 0){
-      state.solved = true;
-    }
+function placePiece(si){
+  if(state.selectedPiece===null) return;
+  if(state.frame[si]!==null){toast('Slot filled!');return;}
+  state.moves++;startTimer();
+  var pid=state.selectedPiece, piece=state.pieces[pid];
+  if(piece.correctIndex===si){
+    state.frame[si]=pid;
+    state.pool=state.pool.filter(function(id){return id!==pid;});
+    state.selectedPiece=null;
+    if(state.pool.length===0){state.solved=true;stopTimer();}
     render();
-    if(state.solved){
-      setTimeout(function(){ playFullMelody(); }, 500);
-    }
+    if(state.solved) setTimeout(function(){playFullMelody();},500);
   } else {
     toast('\u274C Wrong slot! Listen again.');
-    state.selectedPiece = null;
-    render();
+    state.selectedPiece=null; render();
   }
 }
 
 function playFullMelody(){
   if(state.isPlaying) return;
-  state.isPlaying = true;
-  var melody = MELODIES[state.melodyName];
-  var allNotes = melody.notes;
+  state.isPlaying=true;
+  var noteTopiece=[];
+  for(var p=0;p<state.pieces.length;p++) for(var n=0;n<state.pieces[p].notes.length;n++) noteTopiece.push(p);
+  var slots=document.querySelectorAll('.frame-slot');
+  playNotes(state.melody.notes, state.melody.bpm, function(idx){
+    var pid=noteTopiece[idx];
+    if(pid!==undefined){slots.forEach(function(s){s.classList.remove('highlight');});
+      for(var i=0;i<state.frame.length;i++){if(state.frame[i]===pid){if(slots[i])slots[i].classList.add('highlight');break;}}}
+  }, function(){state.isPlaying=false;document.querySelectorAll('.frame-slot').forEach(function(s){s.classList.remove('highlight');});});
+}
 
-  var noteTopiece = [];
-  for(var p=0; p<state.pieces.length; p++){
-    for(var n=0; n<state.pieces[p].notes.length; n++){
-      noteTopiece.push(p);
-    }
+function shareResult(){
+  var dayNum=getDayNum();
+  var diffEmoji={Easy:'\uD83D\uDFE2',Medium:'\uD83D\uDFE1',Hard:'\uD83D\uDD34'};
+  var filled=state.frame.filter(function(f){return f!==null;}).length;
+  var grid='';
+  for(var i=0;i<state.pieceCount;i++){
+    grid+=(state.frame[i]!==null)?'\uD83E\uDDE9':'\u2B1C';
+    if((i+1)%state.cols===0&&i<state.pieceCount-1) grid+='\n';
   }
-
-  var slots = document.querySelectorAll('.frame-slot');
-  playNotes(allNotes, melody.bpm, function(idx){
-    var pieceId = noteTopiece[idx];
-    if(pieceId !== undefined){
-      slots.forEach(function(s){ s.classList.remove('highlight'); });
-      for(var i=0; i<state.frame.length; i++){
-        if(state.frame[i] === pieceId){
-          if(slots[i]) slots[i].classList.add('highlight');
-          break;
-        }
-      }
-    }
-  }, function(){
-    state.isPlaying = false;
-    document.querySelectorAll('.frame-slot').forEach(function(s){ s.classList.remove('highlight'); });
-  });
+  var text='Auzle.Ausaw Day #'+dayNum+' '+diffEmoji[state.difficulty]+'\n'+state.melody.name+' ('+state.melody.lang+')\n'+formatTime(state.elapsed)+' \u00B7 '+state.moves+' moves\n\n'+grid+'\n\nhttps://auzle.blogspot.com';
+  if(navigator.share){navigator.share({text:text}).catch(function(){});}
+  else if(navigator.clipboard){navigator.clipboard.writeText(text).then(function(){toast('Copied!');});}
+  else{toast('Share not available');}
 }
 
-// === DAILY PUZZLE ===
-// Each day picks a melody based on date (cycles through all melodies)
-function getDailyMelody(){
-  var epoch = new Date('2026-05-12');
-  var today = new Date();
-  today.setHours(0,0,0,0);
-  var dayNum = Math.floor((today - epoch) / 86400000);
-  var names = Object.keys(MELODIES);
-  var idx = ((dayNum % names.length) + names.length) % names.length;
-  return {name: names[idx], dayNum: dayNum + 1};
+function switchDifficulty(diff){
+  stopTimer();
+  state.difficulty=diff;
+  state.pieceCount=DIFFICULTIES[diff];
+  startNewGame();
 }
 
-function startGame(melodyName, pieceCount){
-  var melody = MELODIES[melodyName];
-  if(!melody) melodyName = Object.keys(MELODIES)[0];
-  melody = MELODIES[melodyName];
+function startNewGame(){
+  var melody=getDailyMelody();
+  var pc=state.pieceCount;
+  var layout=GRID_LAYOUTS[pc]||[Math.ceil(Math.sqrt(pc)),Math.ceil(pc/Math.ceil(Math.sqrt(pc)))];
 
-  var layout = GRID_LAYOUTS[pieceCount] || [Math.ceil(Math.sqrt(pieceCount)), Math.ceil(pieceCount / Math.ceil(Math.sqrt(pieceCount)))];
-  var cols = layout[0];
-  var rows = layout[1];
-
-  state.melodyName = melodyName;
-  state.pieceCount = pieceCount;
-  state.pieces = splitMelody(melody.notes, pieceCount);
-  state.frame = new Array(pieceCount).fill(null);
-  state.pool = shuffle(state.pieces.map(function(p){ return p.id; }));
-  state.selectedPiece = null;
-  state.solved = false;
-  state.moves = 0;
-  state.startTime = 0;
-  state.timerStarted = false;
-  state.isPlaying = false;
-  state.cols = cols;
-  state.rows = rows;
-  state.edgeMap = generateEdgeMap(cols, rows, pieceCount);
+  state.melody=melody;
+  state.pieces=splitMelody(melody.notes,pc);
+  state.frame=new Array(pc).fill(null);
+  state.pool=shuffle(state.pieces.map(function(p){return p.id;}));
+  state.selectedPiece=null;
+  state.solved=false;
+  state.moves=0;
+  state.startTime=0;
+  state.elapsed=0;
+  state.timerStarted=false;
+  state.timerInterval=null;
+  state.isPlaying=false;
+  state.cols=layout[0];
+  state.rows=layout[1];
+  state.edgeMap=generateEdgeMap(layout[0],layout[1],pc);
   render();
 }
 
-// Init — start with today's daily melody
-var daily = getDailyMelody();
-startGame(daily.name, 12);
-
+// Init
+startNewGame();
 })();
 </script>
 </body>
