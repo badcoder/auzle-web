@@ -44,7 +44,7 @@ function genPuzzle(ds){
   }
   var sp=rng.shuffle(AP),map={};
   for(var i=0;i<covArr.length;i++)map[covArr[i]]=sp[i%sp.length];
-  var epoch=new Date('2026-05-11'),today=new Date(ds);
+  var epoch=new Date('2026-05-12'),today=new Date(ds);
   var pn=Math.max(Math.floor((today-epoch)/86400000)+1,1);
   return{id:pn,date:ds,mapping:map,examples:ex,target:tgt,options:opts};
 }

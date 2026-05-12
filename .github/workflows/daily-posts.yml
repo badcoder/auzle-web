@@ -36,10 +36,8 @@ jobs:
           fi
 
           TODAY=$(date +%Y-%m-%d)
-          AURDLE_EPOCH="2026-05-11"
-          AUSAW_EPOCH="2026-05-12"
-          AURDLE_NUM=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$AURDLE_EPOCH" +%s) ) / 86400 + 1 ))
-          AUSAW_NUM=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$AUSAW_EPOCH" +%s) ) / 86400 + 1 ))
+          EPOCH="2026-05-12"
+          PUZZLE_NUM=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$EPOCH" +%s) ) / 86400 + 1 ))
 
           BASE_URL="https://badcoder.github.io/auzle-web"
 
@@ -70,9 +68,9 @@ jobs:
           echo "=== Publishing Aurdle posts ==="
           for DIFF_INFO in "EASY:3:3:Easy:#2ecc71" "MEDIUM:4:4:Medium:#f39c12" "HARD:5:4:Hard:#e74c3c"; do
             IFS=':' read -r DIFF WLEN OCOUNT LABEL COLOR <<< "$DIFF_INFO"
-            TITLE="🎧 Auzle.Aurdle #${AURDLE_NUM} · ${LABEL} · ${TODAY}"
-            BODY="<p>Daily audio puzzle #${AURDLE_NUM}. Listen to patterns, match the sound, guess the word!</p><link rel=\"stylesheet\" href=\"${BASE_URL}/auzle-game.css\"><div id=\"auzle-game\"></div><script>window.AUZLE_CONFIG={difficulty:'${DIFF}',wordLen:${WLEN},optCount:${OCOUNT},label:'${LABEL}',color:'${COLOR}'};</script><script src=\"${BASE_URL}/auzle-game.js\"></script>"
-            publish_post "$TITLE" "$BODY" "auzle,aurdle,${LABEL,,},puzzle-${AURDLE_NUM}"
+            TITLE="🎧 Auzle.Aurdle #${PUZZLE_NUM} · ${LABEL} · ${TODAY}"
+            BODY="<p>Daily audio puzzle #${PUZZLE_NUM}. Listen to patterns, match the sound, guess the word!</p><link rel=\"stylesheet\" href=\"${BASE_URL}/auzle-game.css\"><div id=\"auzle-game\"></div><script>window.AUZLE_CONFIG={difficulty:'${DIFF}',wordLen:${WLEN},optCount:${OCOUNT},label:'${LABEL}',color:'${COLOR}'};</script><script src=\"${BASE_URL}/auzle-game.js\"></script>"
+            publish_post "$TITLE" "$BODY" "auzle,aurdle,${LABEL,,},puzzle-${PUZZLE_NUM}"
             sleep 2
           done
 
@@ -80,9 +78,9 @@ jobs:
           echo "=== Publishing Ausaw posts ==="
           for DIFF_INFO in "Easy:9" "Medium:16" "Hard:32"; do
             IFS=':' read -r LABEL PIECES <<< "$DIFF_INFO"
-            TITLE="🧩 Auzle.Ausaw #${AUSAW_NUM} · ${LABEL} · ${TODAY}"
-            BODY="<p>Daily audio jigsaw #${AUSAW_NUM}. Listen to the melody, arrange the pieces in order!</p><script>window.AUSAW_CONFIG={difficulty:'${LABEL}'};</script><script src=\"${BASE_URL}/audio-jigsaw.js\"></script>"
-            publish_post "$TITLE" "$BODY" "auzle,ausaw,${LABEL,,},puzzle-${AUSAW_NUM}"
+            TITLE="🧩 Auzle.Ausaw #${PUZZLE_NUM} · ${LABEL} · ${TODAY}"
+            BODY="<p>Daily audio jigsaw #${PUZZLE_NUM}. Listen to the melody, arrange the pieces in order!</p><script>window.AUSAW_CONFIG={difficulty:'${LABEL}'};</script><script src=\"${BASE_URL}/audio-jigsaw.js\"></script>"
+            publish_post "$TITLE" "$BODY" "auzle,ausaw,${LABEL,,},puzzle-${PUZZLE_NUM}"
             sleep 2
           done
 
