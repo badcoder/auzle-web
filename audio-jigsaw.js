@@ -1,7 +1,7 @@
 // Ausaw (Audio Jigsaw) - Embeddable Game Engine
 (function(){
 var style=document.createElement('style');
-style.textContent="*{box-sizing:border-box;margin:0;padding:0}\nbody{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f9fa;display:flex;justify-content:center;min-height:100vh}\n#app{max-width:520px;width:100%;padding:16px;background:#fff;min-height:100vh}\n.top-bar{text-align:center;padding:12px 0;border-bottom:1px solid #eee;margin-bottom:12px}\n.top-bar h1{font-size:18px;color:#1a1a2e;letter-spacing:1px}\n.top-bar .subtitle{font-size:11px;color:#888;margin-top:2px}\n.top-bar .day-info{font-size:12px;color:#4361ee;margin-top:4px;font-weight:600}\n.diff-tabs{display:flex;justify-content:center;gap:8px;margin-bottom:12px}\n.diff-tab{padding:6px 18px;border-radius:20px;border:2px solid #e0e0e0;background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:#666}\n.diff-tab:hover{border-color:#4361ee;color:#4361ee}\n.diff-tab.active{border-color:#4361ee;background:#4361ee;color:#fff}\n.timer{text-align:center;font-size:15px;color:#666;margin-bottom:10px;font-variant-numeric:tabular-nums;font-weight:500}\n.timer span{background:#f0f4ff;padding:4px 12px;border-radius:6px}\n.section-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;margin:12px 0 8px;font-weight:600}\n.melody-info{text-align:center;padding:10px;background:#f0f4ff;border-radius:10px;margin-bottom:12px}\n.melody-info .name{font-size:14px;font-weight:600;color:#333}\n.melody-info .lang{font-size:11px;color:#4361ee;margin-top:2px}\n.play-melody-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 auto;padding:8px 20px;border-radius:8px;border:2px solid #4361ee;background:#fff;color:#4361ee;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:8px}\n.play-melody-btn:hover{background:#4361ee;color:#fff}\n.play-melody-btn.playing{background:#4361ee;color:#fff;animation:pulse 1s infinite}\n@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(67,97,238,.3)}50%{box-shadow:0 0 0 8px rgba(67,97,238,0)}}\n\n/* Jigsaw Frame */\n.frame-wrap{margin:16px 0}\n.jigsaw-frame{display:grid;gap:3px;margin:0 auto;padding:8px;background:#f0f4ff;border-radius:12px;border:2px solid #e0e0e0;width:fit-content}\n.frame-slot{border-radius:4px;background:#e8ecf4;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;transition:all .2s;cursor:pointer;position:relative;font-weight:700}\n.frame-slot.filled{border:2px solid #4361ee;background:#dce4ff;color:#4361ee}\n.frame-slot.highlight{border-color:#ffd700;background:#fff8e1;animation:glow .5s}\n.frame-slot.awaiting{border-color:#2ecc71;background:#e8f8f0;animation:pulse-slot 1s infinite}\n@keyframes glow{0%,100%{box-shadow:0 0 4px rgba(255,215,0,.3)}50%{box-shadow:0 0 12px rgba(255,215,0,.6)}}\n@keyframes pulse-slot{0%,100%{box-shadow:inset 0 0 4px rgba(46,204,113,.2)}50%{box-shadow:inset 0 0 8px rgba(46,204,113,.4)}}\n\n/* Piece Pool */\n.pool-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;margin:12px 0 8px;font-weight:600;text-align:center}\n.pool-label.active{color:#4361ee}\n.piece-pool{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:10px;background:#fafafa;border-radius:10px;min-height:50px}\n.piece{width:42px;height:42px;border-radius:8px;background:#fff;border:2px solid #4361ee;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;user-select:none;font-size:16px}\n.piece:hover{transform:scale(1.08);box-shadow:0 2px 8px rgba(67,97,238,.3)}\n.piece.selected{background:#4361ee;color:#fff;transform:scale(1.1);box-shadow:0 0 10px rgba(67,97,238,.4)}\n\n/* Result */\n.result{text-align:center;padding:16px 0;font-size:18px;font-weight:600}\n.result.win{color:#27ae60}\n.stats{display:flex;justify-content:center;gap:24px;padding:8px 0;color:#666;font-size:13px}\n.share-btn{display:block;margin:12px auto;padding:10px 28px;border-radius:8px;border:none;background:#4361ee;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}\n.share-btn:hover{background:#3a56d4}\n.board-hint-btn{display:block;margin:8px auto;padding:6px 16px;border-radius:16px;border:1px solid #ddd;background:#fafafa;font-size:11px;color:#888;cursor:pointer}\n.board-hint-btn:hover{background:#f0f0f0}\n.instructions{text-align:center;padding:12px 0;font-size:11px;color:#bbb;border-top:1px solid #f0f0f0;margin-top:16px}\n.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100}\n.toast.show{opacity:1}";
+style.textContent="*{box-sizing:border-box;margin:0;padding:0}\nbody{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8f9fa;display:flex;justify-content:center;min-height:100vh}\n#app{max-width:520px;width:100%;padding:16px;background:#fff;min-height:100vh}\n.top-bar{text-align:center;padding:12px 0;border-bottom:1px solid #eee;margin-bottom:12px}\n.top-bar h1{font-size:18px;color:#1a1a2e;letter-spacing:1px}\n.top-bar .subtitle{font-size:11px;color:#888;margin-top:2px}\n.top-bar .day-info{font-size:12px;color:#4361ee;margin-top:4px;font-weight:600}\n.diff-tabs{display:flex;justify-content:center;gap:8px;margin-bottom:12px}\n.diff-tab{padding:6px 18px;border-radius:20px;border:2px solid #e0e0e0;background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:#666}\n.diff-tab:hover{border-color:#4361ee;color:#4361ee}\n.diff-tab.active{border-color:#4361ee;background:#4361ee;color:#fff}\n.timer{text-align:center;font-size:15px;color:#666;margin-bottom:10px;font-variant-numeric:tabular-nums;font-weight:500}\n.timer span{background:#f0f4ff;padding:4px 12px;border-radius:6px}\n.section-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;margin:12px 0 8px;font-weight:600}\n.melody-info{text-align:center;padding:10px;background:#f0f4ff;border-radius:10px;margin-bottom:12px}\n.melody-info .name{font-size:14px;font-weight:600;color:#333}\n.melody-info .lang{font-size:11px;color:#4361ee;margin-top:2px}\n.play-melody-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 auto;padding:8px 20px;border-radius:8px;border:2px solid #4361ee;background:#fff;color:#4361ee;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;margin-top:8px}\n.play-melody-btn:hover{background:#4361ee;color:#fff}\n.play-melody-btn.playing{background:#4361ee;color:#fff;animation:pulse 1s infinite}\n@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(67,97,238,.3)}50%{box-shadow:0 0 0 8px rgba(67,97,238,0)}}\n\n/* Jigsaw Frame */\n.frame-wrap{margin:16px 0}\n.jigsaw-frame{display:grid;gap:3px;margin:0 auto;padding:8px;background:#f0f4ff;border-radius:12px;border:2px solid #e0e0e0;width:fit-content}\n.frame-slot{border-radius:4px;background:#e8ecf4;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:10px;color:#aaa;transition:all .2s;cursor:pointer;position:relative;font-weight:700}\n.frame-slot.filled{border:2px solid #4361ee;background:#dce4ff;color:#4361ee}\n.frame-slot.highlight{border-color:#ffd700;background:#fff8e1;animation:glow .5s}\n.frame-slot.awaiting{border-color:#2ecc71;background:#e8f8f0;animation:pulse-slot 1s infinite}\n@keyframes glow{0%,100%{box-shadow:0 0 4px rgba(255,215,0,.3)}50%{box-shadow:0 0 12px rgba(255,215,0,.6)}}\n@keyframes pulse-slot{0%,100%{box-shadow:inset 0 0 4px rgba(46,204,113,.2)}50%{box-shadow:inset 0 0 8px rgba(46,204,113,.4)}}\n\n/* Piece Pool */\n.pool-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#999;margin:12px 0 8px;font-weight:600;text-align:center}\n.pool-label.active{color:#4361ee}\n.piece-pool{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:10px;background:#fafafa;border-radius:10px;min-height:50px}\n.piece{width:42px;height:42px;border-radius:8px;background:#fff;border:2px solid #4361ee;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;user-select:none;font-size:16px}\n.piece:hover{transform:scale(1.08);box-shadow:0 2px 8px rgba(67,97,238,.3)}\n.piece.selected{background:#4361ee;color:#fff;transform:scale(1.1);box-shadow:0 0 10px rgba(67,97,238,.4)}\n\n/* Result */\n.result{text-align:center;padding:16px 0;font-size:18px;font-weight:600}\n.result.win{color:#27ae60}\n.stats{display:flex;justify-content:center;gap:24px;padding:8px 0;color:#666;font-size:13px}\n.share-btn{display:block;margin:12px auto;padding:10px 28px;border-radius:8px;border:none;background:#4361ee;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s}\n.share-btn:hover{background:#3a56d4}\n\n.instructions{text-align:center;padding:12px 0;font-size:11px;color:#bbb;border-top:1px solid #f0f0f0;margin-top:16px}\n.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100}\n.toast.show{opacity:1}";
 document.head.appendChild(style);
 if(!document.getElementById('app')){
   var c=document.createElement('div');c.id='app';
@@ -441,7 +441,7 @@ var state = {
   timerStarted: false,
   timerInterval: null,
   isPlaying: false,
-  showBoardHints: false,
+  showBoardHints: true,
   cols: 3,
   rows: 3,
   edgeMap: []
@@ -543,15 +543,17 @@ function render(){
   tb.innerHTML='<h1>\uD83E\uDDE9 Ausaw</h1><div class="subtitle">Audio Jigsaw by Auzle</div><div class="day-info">Day #'+dayNum+' \u00B7 '+melody.name+'</div>';
   app.appendChild(tb);
 
-  // Difficulty tabs
-  var tabs=ce('div','diff-tabs');
-  ['Easy','Medium','Hard'].forEach(function(d){
-    var tab=ce('div','diff-tab'+(state.difficulty===d?' active':''));
-    tab.textContent=d+' ('+DIFFICULTIES[d]+'pc)';
-    tab.onclick=function(){switchDifficulty(d);};
-    tabs.appendChild(tab);
-  });
-  app.appendChild(tabs);
+  // Difficulty tabs (hidden when locked via config)
+  if(!lockedDifficulty){
+    var tabs=ce('div','diff-tabs');
+    ['Easy','Medium','Hard'].forEach(function(d){
+      var tab=ce('div','diff-tab'+(state.difficulty===d?' active':''));
+      tab.textContent=d+' ('+DIFFICULTIES[d]+'pc)';
+      tab.onclick=function(){switchDifficulty(d);};
+      tabs.appendChild(tab);
+    });
+    app.appendChild(tabs);
+  }
 
   // Timer
   var timer=ce('div','timer');
@@ -628,11 +630,6 @@ function render(){
   }
   fw.appendChild(frame);
 
-  // Board hints toggle
-  var hintBtn=ce('button','board-hint-btn');
-  hintBtn.textContent=state.showBoardHints?'\uD83E\uDDE9 Board Hints: ON':'\u25A2 Board Hints: OFF';
-  hintBtn.onclick=function(){state.showBoardHints=!state.showBoardHints;render();};
-  fw.appendChild(hintBtn);
   app.appendChild(fw);
 
   // Piece Pool
@@ -779,9 +776,11 @@ function startNewGame(){
 // Config: window.AUSAW_CONFIG can lock difficulty for embeds
 // e.g. window.AUSAW_CONFIG = {difficulty: 'Easy'}
 var cfg = window.AUSAW_CONFIG || {};
+var lockedDifficulty = false;
 if(cfg.difficulty && DIFFICULTIES[cfg.difficulty]){
   state.difficulty = cfg.difficulty;
   state.pieceCount = DIFFICULTIES[cfg.difficulty];
+  lockedDifficulty = true;
 }
 startNewGame();
 })();
