@@ -36,7 +36,7 @@ jobs:
           fi
 
           TODAY=$(date +%Y-%m-%d)
-          EPOCH="2026-05-12"
+          EPOCH="2026-05-13"
           PUZZLE_NUM=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$EPOCH" +%s) ) / 86400 + 1 ))
 
           BASE_URL="https://badcoder.github.io/auzle-web"
